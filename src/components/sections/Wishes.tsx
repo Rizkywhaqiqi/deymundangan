@@ -21,37 +21,54 @@ export default function Wishes({ invitationId, background }: WishesProps) {
   const [formData, setFormData] = useState({ name: '', message: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
+  // Fetch wishes from API (database)
   useEffect(() => {
-    const saved = localStorage.getItem(`wishes_${invitationId}`)
-    if (saved) {
+    const fetchWishes = async () => {
       try {
-        setWishes(JSON.parse(saved))
-      } catch {
-        // ignore
+        const response = await fetch(`/api/wishes?invitation_id=${invitationId}`)
+        if (response.ok) {
+          const data = await response.json()
+          setWishes(data || [])
+        }
+      } catch (error) {
+        console.error('Error fetching wishes:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
+
+    fetchWishes()
   }, [invitationId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    const newWish: WishItem = {
-      id: Date.now().toString(),
-      name: formData.name,
-      message: formData.message,
-      created_at: new Date().toISOString(),
+    try {
+      const response = await fetch('/api/wishes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          invitation_id: invitationId,
+          name: formData.name,
+          message: formData.message,
+        }),
+      })
+
+      if (response.ok) {
+        const newWish = await response.json()
+        setWishes([newWish, ...wishes])
+        setFormData({ name: '', message: '' })
+        setIsSuccess(true)
+        setTimeout(() => setIsSuccess(false), 3000)
+      }
+    } catch (error) {
+      console.error('Error submitting wish:', error)
+    } finally {
+      setIsSubmitting(false)
     }
-
-    const updatedWishes = [newWish, ...wishes]
-    setWishes(updatedWishes)
-    localStorage.setItem(`wishes_${invitationId}`, JSON.stringify(updatedWishes))
-
-    setFormData({ name: '', message: '' })
-    setIsSubmitting(false)
-    setIsSuccess(true)
-    setTimeout(() => setIsSuccess(false), 3000)
   }
 
   return (
@@ -82,9 +99,27 @@ export default function Wishes({ invitationId, background }: WishesProps) {
                 Tulis Ucapan
               </h3>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Nama Anda" className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40 transition-colors" />
-                <textarea required value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} rows={4} placeholder="Tulis ucapan untuk kedua mempelai..." className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40 transition-colors resize-none" />
-                <button type="submit" disabled={isSubmitting} className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-charcoal text-sm tracking-[0.1em] uppercase rounded-full hover:bg-primary-dark transition-colors disabled:opacity-50">
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Nama Anda"
+                  className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40 transition-colors"
+                />
+                <textarea
+                  required
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  rows={4}
+                  placeholder="Tulis ucapan untuk kedua mempelai..."
+                  className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40 transition-colors resize-none"
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-charcoal text-sm tracking-[0.1em] uppercase rounded-full hover:bg-primary-dark transition-colors disabled:opacity-50"
+                >
                   <Send size={16} /> Kirim
                 </button>
                 {isSuccess && <p className="text-xs text-primary text-center">Ucapan Anda telah terkirim!</p>}
@@ -99,7 +134,9 @@ export default function Wishes({ invitationId, background }: WishesProps) {
                 <Heart size={18} className="text-primary" />
                 Ucapan ({wishes.length})
               </h3>
-              {wishes.length === 0 ? (
+              {isLoading ? (
+                <p className="text-sm text-charcoal/40 text-center py-8">Memuat ucapan...</p>
+              ) : wishes.length === 0 ? (
                 <p className="text-sm text-charcoal/40 text-center py-8">Belum ada ucapan. Jadilah yang pertama!</p>
               ) : (
                 <div className="space-y-4">
