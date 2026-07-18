@@ -93,14 +93,14 @@ export function useCountdown(targetDate: string) {
   return timeLeft
 }
 
-export function useAudioPlayer(audioUrl: string | null, autoPlay = false) {
+export function useAudioPlayer(audioUrl: string | null) {
   const [isPlaying, setIsPlaying] = useState(false)
-  const [isValid, setIsValid] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     if (!audioUrl) {
-      setIsValid(false)
+      setIsLoaded(false)
       return
     }
 
@@ -112,18 +112,16 @@ export function useAudioPlayer(audioUrl: string | null, autoPlay = false) {
     audio.src = audioUrl
     audioRef.current = audio
 
-    // Validate audio source
+    // Handle audio loaded
     const handleCanPlay = () => {
-      setIsValid(true)
-      if (autoPlay) {
-        audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
-      }
+      setIsLoaded(true)
+      console.log('Audio loaded successfully')
     }
 
-    const handleError = () => {
-      setIsValid(false)
-      setIsPlaying(false)
-      console.error('Invalid audio URL:', audioUrl)
+    // Handle audio error
+    const handleError = (e: Event) => {
+      console.error('Audio failed to load:', e)
+      setIsLoaded(false)
     }
 
     audio.addEventListener('canplaythrough', handleCanPlay, { once: true })
@@ -141,21 +139,45 @@ export function useAudioPlayer(audioUrl: string | null, autoPlay = false) {
       audio.removeEventListener('error', handleError)
       audioRef.current = null
     }
-  }, [audioUrl, autoPlay])
+  }, [audioUrl])
 
-  const togglePlay = () => {
-    if (!audioRef.current || !isValid) return
+  const togglePlay = async () => {
+    if (!audioRef.current) {
+      console.error('No audio element')
+      return
+    }
 
-    if (isPlaying) {
-      audioRef.current.pause()
-      setIsPlaying(false)
-    } else {
-      audioRef.current.play().then(() => setIsPlaying(true)).catch((error) => {
-        console.error('Play failed:', error)
+    try {
+      if (isPlaying) {
+        audioRef.current.pause()
         setIsPlaying(false)
-      })
+        console.log('Audio paused')
+      } else {
+        // Ensure audio is ready
+        if (audioRef.current.readyState < 2) {
+          console.log('Audio not ready, waiting...')
+          await new Promise((resolve, reject) => {
+            const timeout = setTimeout(resolve, 3000)
+            audioRef.current!.addEventListener('canplaythrough', () => {
+              clearTimeout(timeout)
+              resolve(true)
+            }, { once: true })
+            audioRef.current!.addEventListener('error', () => {
+              clearTimeout(timeout)
+              reject(new Error('Audio failed to load'))
+            }, { once: true })
+          })
+        }
+
+        await audioRef.current.play()
+        setIsPlaying(true)
+        console.log('Audio playing')
+      }
+    } catch (error) {
+      console.error('Playback failed:', error)
+      setIsPlaying(false)
     }
   }
 
-  return { isPlaying, togglePlay, isValid }
+  return { isPlaying, togglePlay, isLoaded }
 }
