@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { getInvitationById, updateInvitation, getCurrentUser } from '@/services/invitation'
-import { Heart, ArrowLeft, Save } from 'lucide-react'
+import { Heart, ArrowLeft, Save, ChevronDown, ChevronUp, Image } from 'lucide-react'
 import Link from 'next/link'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,6 +25,55 @@ const SECTIONS = [
   { key: 'wishes', label: 'Wishes' },
   { key: 'closing', label: 'Closing' },
 ]
+
+function SectionAccordion({ section, value, onChange }: { section: { key: string; label: string }; value: string; onChange: (val: string) => void }) {
+  const [isOpen, setIsOpen] = useState(!!value)
+
+  return (
+    <div className="bg-cream rounded-xl border border-primary/5 overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left"
+      >
+        <span className="text-sm font-medium text-charcoal/70">{section.label}</span>
+        {isOpen ? <ChevronUp size={16} className="text-charcoal/40" /> : <ChevronDown size={16} className="text-charcoal/40" />}
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="px-4 pb-4 space-y-2"
+          >
+            <input
+              type="url"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="https://i.ibb.co/..."
+              className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40"
+            />
+            {value && (
+              <div className="relative group">
+                <img src={value} alt={section.label} className="w-full h-24 object-cover rounded-lg border border-primary/5" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                <button
+                  type="button"
+                  onClick={() => onChange('')}
+                  className="absolute top-1 right-1 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  Hapus
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
 
 export default function EditInvitationPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
@@ -67,7 +116,7 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
     setFormData((prev) => ({
       ...prev,
       backgrounds: {
-        ...(prev.backgrounds || {}),
+        ...((prev.backgrounds as Record<string, string>) || {}),
         [section]: value,
       },
     }))
@@ -148,68 +197,92 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
             </div>
           </section>
 
-          {/* Foto Mempelai (paste link imgbb) */}
+          {/* Foto Mempelai */}
           <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
-            <h2 className="font-serif text-lg text-charcoal mb-6">Foto Mempelai</h2>
-            <p className="text-xs text-charcoal/40 mb-4">
-              Upload foto ke imgbb.com, lalu paste link di sini.
+            <div className="flex items-center gap-2 mb-2">
+              <Image size={18} className="text-primary" />
+              <h2 className="font-serif text-lg text-charcoal">Foto Mempelai</h2>
+            </div>
+            <p className="text-xs text-charcoal/40 mb-6">
+              Upload foto ke <a href="https://imgbb.com" target="_blank" className="text-primary underline">imgbb.com</a>, copy link, paste di bawah.
             </p>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Link Foto Groom</label>
+                <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Foto Groom</label>
                 <input
                   type="url"
                   value={(formData.groom_photo as string) || ''}
                   onChange={(e) => setFormData((prev) => ({ ...prev, groom_photo: e.target.value }))}
-                  placeholder="https://i.ibb.co/..."
+                  placeholder="https://i.ibb.co/xxx/groom.jpg"
                   className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40"
                 />
                 {formData.groom_photo && (
-                  <img src={formData.groom_photo} alt="Groom" className="mt-2 w-full h-32 object-cover rounded-lg border border-primary/10" />
+                  <div className="mt-2 relative group">
+                    <img src={formData.groom_photo as string} alt="Groom" className="w-full h-40 object-cover rounded-lg border border-primary/10" />
+                    <button type="button" onClick={() => setFormData((prev) => ({ ...prev, groom_photo: '' }))} className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                      Hapus
+                    </button>
+                  </div>
                 )}
               </div>
               <div>
-                <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Link Foto Bride</label>
+                <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Foto Bride</label>
                 <input
                   type="url"
                   value={(formData.bride_photo as string) || ''}
                   onChange={(e) => setFormData((prev) => ({ ...prev, bride_photo: e.target.value }))}
-                  placeholder="https://i.ibb.co/..."
+                  placeholder="https://i.ibb.co/xxx/bride.jpg"
                   className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40"
                 />
                 {formData.bride_photo && (
-                  <img src={formData.bride_photo} alt="Bride" className="mt-2 w-full h-32 object-cover rounded-lg border border-primary/10" />
+                  <div className="mt-2 relative group">
+                    <img src={formData.bride_photo as string} alt="Bride" className="w-full h-40 object-cover rounded-lg border border-primary/10" />
+                    <button type="button" onClick={() => setFormData((prev) => ({ ...prev, bride_photo: '' }))} className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                      Hapus
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
           </section>
 
-          {/* Background per Section (paste link imgbb) */}
+          {/* Background per Section */}
           <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
-            <h2 className="font-serif text-lg text-charcoal mb-6">Background per Section</h2>
-            <p className="text-xs text-charcoal/40 mb-4">
-              Upload background ke imgbb.com, lalu paste link di sini. Biarkan kosong untuk background default.
+            <div className="flex items-center gap-2 mb-2">
+              <Image size={18} className="text-primary" />
+              <h2 className="font-serif text-lg text-charcoal">Background per Section</h2>
+            </div>
+            <p className="text-xs text-charcoal/40 mb-6">
+              Klik section untuk expand, paste link gambar. Biarkan kosong untuk background default.
             </p>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
               {SECTIONS.map((section) => (
-                <div key={section.key}>
-                  <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">
-                    {section.label}
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="url"
-                      value={(formData.backgrounds?.[section.key] as string) || ''}
-                      onChange={(e) => handleBackgroundChange(section.key, e.target.value)}
-                      placeholder="https://i.ibb.co/..."
-                      className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40"
-                    />
-                    {formData.backgrounds?.[section.key] && (
-                      <img src={formData.backgrounds[section.key]} alt={section.label} className="mt-1 w-full h-20 object-cover rounded-lg border border-primary/5" />
-                    )}
-                  </div>
-                </div>
+                <SectionAccordion
+                  key={section.key}
+                  section={section}
+                  value={((formData.backgrounds as Record<string, string>)?.[section.key]) || ''}
+                  onChange={(val) => handleBackgroundChange(section.key, val)}
+                />
               ))}
+            </div>
+          </section>
+
+          {/* Basic Info */}
+          <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
+            <h2 className="font-serif text-lg text-charcoal mb-6">Informasi Dasar</h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Slug</label>
+                <input name="slug" value={(formData.slug as string) || ''} onChange={handleChange} className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal focus:outline-none focus:border-primary/40" />
+              </div>
+              <div>
+                <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Tema</label>
+                <select name="theme" value={(formData.theme as string) || 'premium'} onChange={handleChange} className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal focus:outline-none focus:border-primary/40">
+                  <option value="premium">Premium</option>
+                  <option value="classic">Classic</option>
+                  <option value="modern">Modern</option>
+                </select>
+              </div>
             </div>
           </section>
 
