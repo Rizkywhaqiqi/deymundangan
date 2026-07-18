@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import ScrollReveal from '@/components/ui/ScrollReveal'
-import { getWishes, submitWish } from '@/services/invitation'
 import { Send, Heart, MessageCircle } from 'lucide-react'
 
 interface WishItem {
@@ -23,36 +22,35 @@ export default function Wishes({ invitationId }: WishesProps) {
   const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
-    const loadWishes = async () => {
+    const saved = localStorage.getItem(`wishes_${invitationId}`)
+    if (saved) {
       try {
-        const data = await getWishes(invitationId)
-        setWishes(data as WishItem[])
+        setWishes(JSON.parse(saved))
       } catch {
-        // Silently fail
+        // ignore
       }
     }
-    loadWishes()
   }, [invitationId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    try {
-      await submitWish({
-        invitation_id: invitationId,
-        name: formData.name,
-        message: formData.message,
-        is_approved: false,
-      })
-      setFormData({ name: '', message: '' })
-      setIsSuccess(true)
-      setTimeout(() => setIsSuccess(false), 3000)
-    } catch {
-      // Silently fail
-    } finally {
-      setIsSubmitting(false)
+    const newWish: WishItem = {
+      id: Date.now().toString(),
+      name: formData.name,
+      message: formData.message,
+      created_at: new Date().toISOString(),
     }
+
+    const updatedWishes = [newWish, ...wishes]
+    setWishes(updatedWishes)
+    localStorage.setItem(`wishes_${invitationId}`, JSON.stringify(updatedWishes))
+
+    setFormData({ name: '', message: '' })
+    setIsSubmitting(false)
+    setIsSuccess(true)
+    setTimeout(() => setIsSuccess(false), 3000)
   }
 
   return (
@@ -107,7 +105,7 @@ export default function Wishes({ invitationId }: WishesProps) {
 
                 {isSuccess && (
                   <p className="text-xs text-primary text-center">
-                    Ucapan Anda telah terkirim! (Menunggu persetujuan)
+                    Ucapan Anda telah terkirim!
                   </p>
                 )}
               </form>
