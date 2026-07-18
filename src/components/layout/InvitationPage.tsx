@@ -94,7 +94,7 @@ interface InvitationPageProps {
 export default function InvitationPage({ invitation, stories, galleries, gifts }: InvitationPageProps) {
   const [isOpen, setIsOpen] = useState(false)
   const progress = useScrollProgress()
-  const { isPlaying, togglePlay } = useAudioPlayer(invitation.music_url)
+  const { isPlaying, togglePlay } = useAudioPlayer(invitation.music_url, isOpen)
   const bg = invitation.backgrounds || {}
 
   const weddingDate = `${invitation.wedding_day}, ${new Date(invitation.wedding_date).toLocaleDateString('id-ID', {

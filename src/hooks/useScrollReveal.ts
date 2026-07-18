@@ -93,7 +93,7 @@ export function useCountdown(targetDate: string) {
   return timeLeft
 }
 
-export function useAudioPlayer(audioUrl: string | null) {
+export function useAudioPlayer(audioUrl: string | null, autoPlay = false) {
   const [isPlaying, setIsPlaying] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
@@ -103,13 +103,20 @@ export function useAudioPlayer(audioUrl: string | null) {
     audioRef.current.loop = true
     audioRef.current.volume = 0.5
 
+    if (autoPlay) {
+      audioRef.current.play().catch(() => {
+        setIsPlaying(false)
+      })
+      setIsPlaying(true)
+    }
+
     return () => {
       if (audioRef.current) {
         audioRef.current.pause()
         audioRef.current = null
       }
     }
-  }, [audioUrl])
+  }, [audioUrl, autoPlay])
 
   const togglePlay = () => {
     if (!audioRef.current) return
