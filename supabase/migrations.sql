@@ -155,7 +155,12 @@ ALTER TABLE guests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rsvp ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wishes ENABLE ROW LEVEL SECURITY;
 
+-- Hapus policy yang sudah ada (jika ada) lalu buat ulang
 -- Profiles policies
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+
 CREATE POLICY "Public profiles are viewable by everyone" ON profiles
   FOR SELECT USING (true);
 
@@ -166,6 +171,11 @@ CREATE POLICY "Users can update own profile" ON profiles
   FOR UPDATE USING (auth.uid() = id);
 
 -- Invitations policies
+DROP POLICY IF EXISTS "Published invitations viewable by everyone" ON invitations;
+DROP POLICY IF EXISTS "Users can insert invitations" ON invitations;
+DROP POLICY IF EXISTS "Users can update own invitations" ON invitations;
+DROP POLICY IF EXISTS "Users can delete own invitations" ON invitations;
+
 CREATE POLICY "Published invitations viewable by everyone" ON invitations
   FOR SELECT USING (is_published = true OR auth.uid() = user_id);
 
@@ -179,6 +189,9 @@ CREATE POLICY "Users can delete own invitations" ON invitations
   FOR DELETE USING (auth.uid() = user_id);
 
 -- Stories policies
+DROP POLICY IF EXISTS "Stories viewable by everyone" ON stories;
+DROP POLICY IF EXISTS "Users can manage stories" ON stories;
+
 CREATE POLICY "Stories viewable by everyone" ON stories
   FOR SELECT USING (EXISTS (
     SELECT 1 FROM invitations WHERE id = stories.invitation_id AND (is_published = true OR user_id = auth.uid())
@@ -190,6 +203,9 @@ CREATE POLICY "Users can manage stories" ON stories
   ));
 
 -- Galleries policies
+DROP POLICY IF EXISTS "Galleries viewable by everyone" ON galleries;
+DROP POLICY IF EXISTS "Users can manage galleries" ON galleries;
+
 CREATE POLICY "Galleries viewable by everyone" ON galleries
   FOR SELECT USING (EXISTS (
     SELECT 1 FROM invitations WHERE id = galleries.invitation_id AND (is_published = true OR user_id = auth.uid())
@@ -201,6 +217,9 @@ CREATE POLICY "Users can manage galleries" ON galleries
   ));
 
 -- Events policies
+DROP POLICY IF EXISTS "Events viewable by everyone" ON events;
+DROP POLICY IF EXISTS "Users can manage events" ON events;
+
 CREATE POLICY "Events viewable by everyone" ON events
   FOR SELECT USING (EXISTS (
     SELECT 1 FROM invitations WHERE id = events.invitation_id AND (is_published = true OR user_id = auth.uid())
@@ -212,6 +231,9 @@ CREATE POLICY "Users can manage events" ON events
   ));
 
 -- Gifts policies
+DROP POLICY IF EXISTS "Gifts viewable by everyone" ON gifts;
+DROP POLICY IF EXISTS "Users can manage gifts" ON gifts;
+
 CREATE POLICY "Gifts viewable by everyone" ON gifts
   FOR SELECT USING (EXISTS (
     SELECT 1 FROM invitations WHERE id = gifts.invitation_id AND (is_published = true OR user_id = auth.uid())
@@ -223,6 +245,9 @@ CREATE POLICY "Users can manage gifts" ON gifts
   ));
 
 -- Guests policies
+DROP POLICY IF EXISTS "Guests viewable by everyone" ON guests;
+DROP POLICY IF EXISTS "Users can manage guests" ON guests;
+
 CREATE POLICY "Guests viewable by everyone" ON guests
   FOR SELECT USING (EXISTS (
     SELECT 1 FROM invitations WHERE id = guests.invitation_id AND (is_published = true OR user_id = auth.uid())
@@ -234,6 +259,9 @@ CREATE POLICY "Users can manage guests" ON guests
   ));
 
 -- RSVP policies
+DROP POLICY IF EXISTS "Anyone can insert RSVP" ON rsvp;
+DROP POLICY IF EXISTS "RSVP viewable by invitation owner" ON rsvp;
+
 CREATE POLICY "Anyone can insert RSVP" ON rsvp
   FOR INSERT WITH CHECK (true);
 
@@ -243,6 +271,10 @@ CREATE POLICY "RSVP viewable by invitation owner" ON rsvp
   ));
 
 -- Wishes policies
+DROP POLICY IF EXISTS "Anyone can insert wishes" ON wishes;
+DROP POLICY IF EXISTS "Approved wishes viewable by everyone" ON wishes;
+DROP POLICY IF EXISTS "Users can manage wishes" ON wishes;
+
 CREATE POLICY "Anyone can insert wishes" ON wishes
   FOR INSERT WITH CHECK (true);
 

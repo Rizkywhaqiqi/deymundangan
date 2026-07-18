@@ -22,8 +22,9 @@ export default function AdminLoginPage() {
     try {
       await signIn(email, password)
       router.push('/admin/dashboard')
-    } catch {
-      setError('Email atau password salah.')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Email atau password salah.'
+      setError(message)
     } finally {
       setIsLoading(false)
     }
