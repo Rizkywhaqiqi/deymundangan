@@ -6,7 +6,6 @@ import { motion } from 'framer-motion'
 import { getInvitationById, updateInvitation, getCurrentUser } from '@/services/invitation'
 import { Heart, ArrowLeft, Save } from 'lucide-react'
 import Link from 'next/link'
-import ImageUploader from '@/components/ui/ImageUploader'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FormData = Record<string, any>
@@ -64,12 +63,12 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
     }))
   }
 
-  const handleBackgroundChange = (sectionKey: string, url: string) => {
+  const handleBackgroundChange = (section: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
       backgrounds: {
         ...(prev.backgrounds || {}),
-        [sectionKey]: url,
+        [section]: value,
       },
     }))
   }
@@ -149,57 +148,68 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
             </div>
           </section>
 
-          {/* Photos */}
+          {/* Foto Mempelai (paste link imgbb) */}
           <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
             <h2 className="font-serif text-lg text-charcoal mb-6">Foto Mempelai</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <ImageUploader
-                label="Foto Groom"
-                value={formData.groom_photo}
-                onChange={(url) => setFormData((prev) => ({ ...prev, groom_photo: url }))}
-              />
-              <ImageUploader
-                label="Foto Bride"
-                value={formData.bride_photo}
-                onChange={(url) => setFormData((prev) => ({ ...prev, bride_photo: url }))}
-              />
-            </div>
-          </section>
-
-          {/* Backgrounds per Section */}
-          <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
-            <h2 className="font-serif text-lg text-charcoal mb-6">Background per Section</h2>
-            <p className="text-xs text-charcoal/40 mb-6">
-              Upload background untuk setiap chapter. Biarkan kosong untuk menggunakan default.
+            <p className="text-xs text-charcoal/40 mb-4">
+              Upload foto ke imgbb.com, lalu paste link di sini.
             </p>
-            <div className="grid md:grid-cols-2 gap-6">
-              {SECTIONS.map((section) => (
-                <ImageUploader
-                  key={section.key}
-                  label={section.label}
-                  value={formData.backgrounds?.[section.key] || ''}
-                  onChange={(url) => handleBackgroundChange(section.key, url)}
-                />
-              ))}
-            </div>
-          </section>
-
-          {/* Basic Info */}
-          <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
-            <h2 className="font-serif text-lg text-charcoal mb-6">Informasi Dasar</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Slug</label>
-                <input name="slug" value={(formData.slug as string) || ''} onChange={handleChange} className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal focus:outline-none focus:border-primary/40" />
+                <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Link Foto Groom</label>
+                <input
+                  type="url"
+                  value={(formData.groom_photo as string) || ''}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, groom_photo: e.target.value }))}
+                  placeholder="https://i.ibb.co/..."
+                  className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40"
+                />
+                {formData.groom_photo && (
+                  <img src={formData.groom_photo} alt="Groom" className="mt-2 w-full h-32 object-cover rounded-lg border border-primary/10" />
+                )}
               </div>
               <div>
-                <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Tema</label>
-                <select name="theme" value={(formData.theme as string) || 'premium'} onChange={handleChange} className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal focus:outline-none focus:border-primary/40">
-                  <option value="premium">Premium</option>
-                  <option value="classic">Classic</option>
-                  <option value="modern">Modern</option>
-                </select>
+                <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Link Foto Bride</label>
+                <input
+                  type="url"
+                  value={(formData.bride_photo as string) || ''}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, bride_photo: e.target.value }))}
+                  placeholder="https://i.ibb.co/..."
+                  className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40"
+                />
+                {formData.bride_photo && (
+                  <img src={formData.bride_photo} alt="Bride" className="mt-2 w-full h-32 object-cover rounded-lg border border-primary/10" />
+                )}
               </div>
+            </div>
+          </section>
+
+          {/* Background per Section (paste link imgbb) */}
+          <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
+            <h2 className="font-serif text-lg text-charcoal mb-6">Background per Section</h2>
+            <p className="text-xs text-charcoal/40 mb-4">
+              Upload background ke imgbb.com, lalu paste link di sini. Biarkan kosong untuk background default.
+            </p>
+            <div className="grid md:grid-cols-2 gap-4">
+              {SECTIONS.map((section) => (
+                <div key={section.key}>
+                  <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">
+                    {section.label}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="url"
+                      value={(formData.backgrounds?.[section.key] as string) || ''}
+                      onChange={(e) => handleBackgroundChange(section.key, e.target.value)}
+                      placeholder="https://i.ibb.co/..."
+                      className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40"
+                    />
+                    {formData.backgrounds?.[section.key] && (
+                      <img src={formData.backgrounds[section.key]} alt={section.label} className="mt-1 w-full h-20 object-cover rounded-lg border border-primary/5" />
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
