@@ -1,7 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+
+interface Particle {
+  left: string
+  top: string
+  duration: number
+  delay: number
+}
 
 interface OpeningProps {
   groomName: string
@@ -12,6 +19,18 @@ interface OpeningProps {
 
 export default function Opening({ groomName, brideName, weddingDate, onOpen }: OpeningProps) {
   const [isVisible, setIsVisible] = useState(true)
+  const [particles, setParticles] = useState<Particle[]>([])
+
+  useEffect(() => {
+    // Generate random positions only on client to avoid hydration mismatch
+    const generated = Array.from({ length: 20 }, () => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      duration: 3 + Math.random() * 2,
+      delay: Math.random() * 2,
+    }))
+    setParticles(generated)
+  }, [])
 
   const handleOpen = () => {
     setIsVisible(false)
@@ -33,23 +52,23 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen }: O
             <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-rose/5 via-transparent to-primary/5 blur-3xl" />
           </div>
 
-          {/* Floating particles */}
-          {[...Array(20)].map((_, i) => (
+          {/* Floating particles - rendered only on client */}
+          {particles.map((p, i) => (
             <motion.div
               key={i}
               className="absolute w-1 h-1 bg-primary/30 rounded-full"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
+                left: p.left,
+                top: p.top,
               }}
               animate={{
                 y: [0, -30, 0],
                 opacity: [0.2, 0.8, 0.2],
               }}
               transition={{
-                duration: 3 + Math.random() * 2,
+                duration: p.duration,
                 repeat: Infinity,
-                delay: Math.random() * 2,
+                delay: p.delay,
               }}
             />
           ))}
