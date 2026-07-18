@@ -133,7 +133,7 @@ export default function InvitationPage({ invitation, stories, galleries, gifts }
       </div>
 
       {/* Music Toggle */}
-      {invitation.music_url && (
+      {isValid && (
         <button
           onClick={togglePlay}
           className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-primary/90 text-charcoal flex items-center justify-center shadow-lg hover:bg-primary transition-colors"
