@@ -99,33 +99,64 @@ export function useAudioPlayer(audioUrl: string | null, autoPlay = false) {
 
   useEffect(() => {
     if (!audioUrl) return
-    audioRef.current = new Audio(audioUrl)
-    audioRef.current.loop = true
-    audioRef.current.volume = 0.5
 
+    // Create audio element
+    const audio = new Audio(audioUrl)
+    audio.loop = true
+    audio.volume = 0.5
+    audio.preload = 'auto'
+    audioRef.current = audio
+
+    // Try to autoplay if requested
     if (autoPlay) {
-      audioRef.current.play().catch(() => {
-        setIsPlaying(false)
-      })
-      setIsPlaying(true)
+      const attemptPlay = () => {
+        const playPromise = audio.play()
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true)
+            })
+            .catch((error) => {
+              console.log('Autoplay blocked, waiting for interaction:', error)
+              setIsPlaying(false)
+            })
+        }
+      }
+
+      // Wait for audio to be ready
+      if (audio.readyState >= 2) {
+        attemptPlay()
+      } else {
+        audio.addEventListener('canplaythrough', attemptPlay, { once: true })
+      }
     }
 
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current = null
-      }
+      audio.pause()
+      audio.src = ''
+      audioRef.current = null
     }
   }, [audioUrl, autoPlay])
 
   const togglePlay = () => {
     if (!audioRef.current) return
+
     if (isPlaying) {
       audioRef.current.pause()
+      setIsPlaying(false)
     } else {
-      audioRef.current.play().catch(() => {})
+      const playPromise = audioRef.current.play()
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true)
+          })
+          .catch((error) => {
+            console.log('Play failed:', error)
+            setIsPlaying(false)
+          })
+      }
     }
-    setIsPlaying(!isPlaying)
   }
 
   return { isPlaying, togglePlay }

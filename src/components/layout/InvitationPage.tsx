@@ -94,7 +94,7 @@ interface InvitationPageProps {
 export default function InvitationPage({ invitation, stories, galleries, gifts }: InvitationPageProps) {
   const [isOpen, setIsOpen] = useState(false)
   const progress = useScrollProgress()
-  const { isPlaying, togglePlay } = useAudioPlayer(invitation.music_url, isOpen)
+  const { isPlaying, togglePlay } = useAudioPlayer(invitation.music_url)
   const bg = invitation.backgrounds || {}
 
   const weddingDate = `${invitation.wedding_day}, ${new Date(invitation.wedding_date).toLocaleDateString('id-ID', {
@@ -105,7 +105,11 @@ export default function InvitationPage({ invitation, stories, galleries, gifts }
 
   const handleOpen = useCallback(() => {
     setIsOpen(true)
-  }, [])
+    // Auto play music after user interaction
+    if (invitation.music_url) {
+      setTimeout(() => togglePlay(), 100)
+    }
+  }, [invitation.music_url, togglePlay])
 
   return (
     <>
