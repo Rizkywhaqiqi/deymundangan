@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { createInvitation } from '@/services/invitation'
+import { createInvitation, getCurrentUser } from '@/services/invitation'
 import { Heart, ArrowLeft, Save } from 'lucide-react'
 import Link from 'next/link'
 import { generateSlug } from '@/lib/utils'
@@ -11,6 +11,7 @@ import { generateSlug } from '@/lib/utils'
 export default function NewInvitationPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     slug: '',
     groom_name: '',
@@ -46,8 +47,19 @@ export default function NewInvitationPage() {
     theme: 'premium',
     is_published: false,
     is_active: true,
-    user_id: null,
+    user_id: null as string | null,
   })
+
+  useEffect(() => {
+    const init = async () => {
+      const user = await getCurrentUser()
+      if (user) {
+        setCurrentUserId(user.id)
+        setFormData((prev) => ({ ...prev, user_id: user.id }))
+      }
+    }
+    init()
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
