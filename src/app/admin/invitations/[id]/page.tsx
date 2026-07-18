@@ -4,11 +4,28 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { getInvitationById, updateInvitation, getCurrentUser } from '@/services/invitation'
-import { Heart, ArrowLeft, Save, Trash2 } from 'lucide-react'
+import { Heart, ArrowLeft, Save } from 'lucide-react'
 import Link from 'next/link'
+import ImageUploader from '@/components/ui/ImageUploader'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FormData = Record<string, any>
+
+const SECTIONS = [
+  { key: 'opening', label: 'Opening' },
+  { key: 'hero', label: 'Hero' },
+  { key: 'quote', label: 'Quote' },
+  { key: 'bride_groom', label: 'Bride & Groom' },
+  { key: 'love_story', label: 'Love Story' },
+  { key: 'gallery', label: 'Gallery' },
+  { key: 'video', label: 'Video' },
+  { key: 'wedding_event', label: 'Wedding Event' },
+  { key: 'countdown', label: 'Countdown' },
+  { key: 'maps', label: 'Maps' },
+  { key: 'wedding_gift', label: 'Wedding Gift' },
+  { key: 'wishes', label: 'Wishes' },
+  { key: 'closing', label: 'Closing' },
+]
 
 export default function EditInvitationPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
@@ -44,6 +61,16 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+    }))
+  }
+
+  const handleBackgroundChange = (sectionKey: string, url: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      backgrounds: {
+        ...(prev.backgrounds || {}),
+        [sectionKey]: url,
+      },
     }))
   }
 
@@ -122,14 +149,44 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
             </div>
           </section>
 
-          {/* All form sections - same as new page but with existing data */}
-          {/* Using a simple approach - just key fields for editing */}
+          {/* Photos */}
           <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
-            <h2 className="font-serif text-lg text-charcoal mb-6">Edit Data</h2>
-            <p className="text-xs text-charcoal/40 mb-6">
-              Silakan edit data undangan di database langsung untuk perubahan lengkap. Halaman ini menyediakan toggle publikasi.
-            </p>
+            <h2 className="font-serif text-lg text-charcoal mb-6">Foto Mempelai</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <ImageUploader
+                label="Foto Groom"
+                value={formData.groom_photo}
+                onChange={(url) => setFormData((prev) => ({ ...prev, groom_photo: url }))}
+              />
+              <ImageUploader
+                label="Foto Bride"
+                value={formData.bride_photo}
+                onChange={(url) => setFormData((prev) => ({ ...prev, bride_photo: url }))}
+              />
+            </div>
+          </section>
 
+          {/* Backgrounds per Section */}
+          <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
+            <h2 className="font-serif text-lg text-charcoal mb-6">Background per Section</h2>
+            <p className="text-xs text-charcoal/40 mb-6">
+              Upload background untuk setiap chapter. Biarkan kosong untuk menggunakan default.
+            </p>
+            <div className="grid md:grid-cols-2 gap-6">
+              {SECTIONS.map((section) => (
+                <ImageUploader
+                  key={section.key}
+                  label={section.label}
+                  value={formData.backgrounds?.[section.key] || ''}
+                  onChange={(url) => handleBackgroundChange(section.key, url)}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* Basic Info */}
+          <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
+            <h2 className="font-serif text-lg text-charcoal mb-6">Informasi Dasar</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Slug</label>
