@@ -15,14 +15,14 @@ interface OpeningProps {
   brideName: string
   weddingDate: string
   onOpen: () => void
+  background?: string | null
 }
 
-export default function Opening({ groomName, brideName, weddingDate, onOpen }: OpeningProps) {
+export default function Opening({ groomName, brideName, weddingDate, onOpen, background }: OpeningProps) {
   const [isVisible, setIsVisible] = useState(true)
   const [particles, setParticles] = useState<Particle[]>([])
 
   useEffect(() => {
-    // Generate random positions only on client to avoid hydration mismatch
     const generated = Array.from({ length: 20 }, () => ({
       left: `${Math.random() * 100}%`,
       top: `${Math.random() * 100}%`,
@@ -44,45 +44,41 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen }: O
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.1 }}
           transition={{ duration: 0.8, ease: 'easeInOut' }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0a0a]"
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{
+            backgroundColor: background ? 'transparent' : '#0a0a0a',
+            backgroundImage: background ? `url(${background})` : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
         >
+          {/* Overlay for readability */}
+          {background && <div className="absolute inset-0 bg-black/60" />}
+
           {/* Decorative background elements */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-primary/5 via-transparent to-rose/5 blur-3xl" />
             <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-rose/5 via-transparent to-primary/5 blur-3xl" />
           </div>
 
-          {/* Floating particles - rendered only on client */}
+          {/* Floating particles */}
           {particles.map((p, i) => (
             <motion.div
               key={i}
               className="absolute w-1 h-1 bg-primary/30 rounded-full"
-              style={{
-                left: p.left,
-                top: p.top,
-              }}
-              animate={{
-                y: [0, -30, 0],
-                opacity: [0.2, 0.8, 0.2],
-              }}
-              transition={{
-                duration: p.duration,
-                repeat: Infinity,
-                delay: p.delay,
-              }}
+              style={{ left: p.left, top: p.top }}
+              animate={{ y: [0, -30, 0], opacity: [0.2, 0.8, 0.2] }}
+              transition={{ duration: p.duration, repeat: Infinity, delay: p.delay }}
             />
           ))}
 
           <div className="relative z-10 text-center px-6">
-            {/* Decorative line */}
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 1.5, delay: 0.3 }}
               className="w-16 h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent mx-auto mb-8"
             />
-
-            {/* The Wedding Of */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -91,8 +87,6 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen }: O
             >
               The Wedding Of
             </motion.p>
-
-            {/* Names */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -101,7 +95,6 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen }: O
             >
               {groomName}
             </motion.h1>
-
             <motion.div
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -112,7 +105,6 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen }: O
               <span className="font-display text-2xl text-primary">&</span>
               <div className="w-12 h-[1px] bg-primary/60" />
             </motion.div>
-
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -121,8 +113,6 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen }: O
             >
               {brideName}
             </motion.h1>
-
-            {/* Date */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -131,8 +121,6 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen }: O
             >
               {weddingDate}
             </motion.p>
-
-            {/* Open Button */}
             <motion.button
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -145,8 +133,6 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen }: O
               <span className="relative z-10">Buka Undangan</span>
               <div className="absolute inset-0 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
             </motion.button>
-
-            {/* Scroll indicator */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

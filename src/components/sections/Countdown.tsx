@@ -1,35 +1,48 @@
 'use client'
 
-import { useCountdown } from '@/hooks/useScrollReveal'
+import { useState, useEffect } from 'react'
 import ScrollReveal from '@/components/ui/ScrollReveal'
 
 interface CountdownProps {
   targetDate: string
+  background?: string | null
 }
 
-export default function Countdown({ targetDate }: CountdownProps) {
-  const { days, hours, minutes, seconds, isExpired } = useCountdown(targetDate)
+export default function Countdown({ targetDate, background }: CountdownProps) {
+  const calculateTimeLeft = () => {
+    const difference = new Date(targetDate).getTime() - new Date().getTime()
+    if (difference > 0) {
+      return {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / (1000 * 60)) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+      }
+    }
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 }
+  }
 
-  if (isExpired) return null
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft())
 
-  const timeUnits = [
-    { label: 'Hari', value: days },
-    { label: 'Jam', value: hours },
-    { label: 'Menit', value: minutes },
-    { label: 'Detik', value: seconds },
-  ]
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [targetDate])
 
   return (
-    <section className="relative py-28 md:py-36 overflow-hidden bg-gradient-to-b from-warm-white via-cream to-warm-white">
-      {/* Decorative background */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-charcoal" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-charcoal" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full border border-charcoal" />
-      </div>
-
+    <section
+      className="relative py-28 md:py-36 lg:py-44 overflow-hidden"
+      style={
+        background
+          ? { backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+          : { backgroundColor: '#faf8f5' }
+      }
+    >
+      {background && <div className="absolute inset-0 bg-black/50" />}
       <div className="section-container relative z-10">
-        <div className="text-center mb-12">
+        <div className="text-center mb-16">
           <ScrollReveal>
             <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4">Countdown</p>
             <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4">Menuju Hari Bahagia</h2>
@@ -38,18 +51,13 @@ export default function Countdown({ targetDate }: CountdownProps) {
         </div>
 
         <div className="flex justify-center gap-4 md:gap-8">
-          {timeUnits.map((unit, index) => (
-            <ScrollReveal key={unit.label} delay={index * 150}>
+          {Object.entries(timeLeft).map(([unit, value]) => (
+            <ScrollReveal key={unit} variant="scale" delay={Object.keys(timeLeft).indexOf(unit) * 100}>
               <div className="text-center">
-                <div className="relative w-20 h-20 md:w-28 md:h-28 flex items-center justify-center bg-warm-white rounded-xl shadow-sm border border-primary/10">
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-b from-primary/5 to-transparent" />
-                  <span className="relative font-serif text-3xl md:text-4xl text-charcoal">
-                    {String(unit.value).padStart(2, '0')}
-                  </span>
+                <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-white shadow-sm border border-primary/10 flex items-center justify-center">
+                  <span className="font-display text-2xl md:text-4xl text-charcoal">{value}</span>
                 </div>
-                <p className="mt-3 text-xs tracking-[0.2em] text-charcoal/50 uppercase">
-                  {unit.label}
-                </p>
+                <p className="text-xs tracking-[0.2em] text-charcoal/50 uppercase mt-3">{unit}</p>
               </div>
             </ScrollReveal>
           ))}

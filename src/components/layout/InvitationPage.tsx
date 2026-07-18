@@ -48,11 +48,13 @@ export interface InvitationData {
   groom_father: string
   groom_mother: string
   groom_child_order: string
+  groom_photo?: string | null
   bride_name: string
   bride_nickname: string
   bride_father: string
   bride_mother: string
   bride_child_order: string
+  bride_photo?: string | null
   wedding_date: string
   wedding_day: string
   venue_name: string
@@ -73,6 +75,7 @@ export interface InvitationData {
   cover_image: string | null
   music_url: string | null
   video_url: string | null
+  backgrounds?: Record<string, string> | null
   theme: string
   is_published: boolean
   is_active: boolean
@@ -92,6 +95,7 @@ export default function InvitationPage({ invitation, stories, galleries, gifts }
   const [isOpen, setIsOpen] = useState(false)
   const progress = useScrollProgress()
   const { isPlaying, togglePlay } = useAudioPlayer(invitation.music_url)
+  const bg = invitation.backgrounds || {}
 
   const weddingDate = `${invitation.wedding_day}, ${new Date(invitation.wedding_date).toLocaleDateString('id-ID', {
     day: 'numeric',
@@ -112,6 +116,7 @@ export default function InvitationPage({ invitation, stories, galleries, gifts }
           brideName={invitation.bride_name}
           weddingDate={weddingDate}
           onOpen={handleOpen}
+          background={bg.opening}
         />
       )}
 
@@ -140,11 +145,13 @@ export default function InvitationPage({ invitation, stories, galleries, gifts }
           brideName={invitation.bride_name}
           weddingDate={weddingDate}
           venueName={invitation.venue_name}
+          background={bg.hero}
         />
 
         <Quote
           ayat={invitation.quote_ayat}
           surah={invitation.quote_surah}
+          background={bg.quote}
         />
 
         <BrideGroom
@@ -153,18 +160,20 @@ export default function InvitationPage({ invitation, stories, galleries, gifts }
           groomFather={invitation.groom_father}
           groomMother={invitation.groom_mother}
           groomChildOrder={invitation.groom_child_order}
+          groomPhoto={invitation.groom_photo}
           brideName={invitation.bride_name}
           brideNickname={invitation.bride_nickname}
           brideFather={invitation.bride_father}
           brideMother={invitation.bride_mother}
           brideChildOrder={invitation.bride_child_order}
+          bridePhoto={invitation.bride_photo}
+          background={bg.bride_groom}
         />
 
-        <LoveStory stories={stories} />
+        <LoveStory stories={stories} background={bg.love_story} />
+        <Gallery images={galleries} background={bg.gallery} />
 
-        <Gallery images={galleries} />
-
-        <Video videoUrl={invitation.video_url} />
+        <Video videoUrl={invitation.video_url} background={bg.video} />
 
         <WeddingEvent
           akadDate={invitation.akad_date}
@@ -178,25 +187,26 @@ export default function InvitationPage({ invitation, stories, galleries, gifts }
           venueName={invitation.venue_name}
           venueAddress={invitation.venue_address}
           venueCity={invitation.venue_city}
+          background={bg.wedding_event}
         />
 
-        <Countdown targetDate={invitation.wedding_date} />
+        <Countdown targetDate={invitation.wedding_date} background={bg.countdown} />
 
         <Maps
           venueName={invitation.venue_name}
           venueAddress={invitation.venue_address}
           mapUrl={invitation.venue_map_url}
+          background={bg.maps}
         />
 
-        <WeddingGift gifts={gifts} />
-
-        <RSVP invitationId={invitation.id} />
-
-        <Wishes invitationId={invitation.id} />
+        <WeddingGift gifts={gifts} background={bg.wedding_gift} />
+        <RSVP invitationId={invitation.id} background={bg.wishes} />
+        <Wishes invitationId={invitation.id} background={bg.wishes} />
 
         <Closing
           groomName={invitation.groom_name}
           brideName={invitation.bride_name}
+          background={bg.closing}
         />
 
         {/* Footer */}

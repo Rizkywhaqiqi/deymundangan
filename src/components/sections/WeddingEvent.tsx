@@ -1,16 +1,7 @@
 'use client'
 
 import ScrollReveal from '@/components/ui/ScrollReveal'
-import { Calendar, Clock, MapPin } from 'lucide-react'
-import { formatDate, formatTime } from '@/lib/utils'
-
-interface EventDetail {
-  type: string
-  date: string
-  time_start: string
-  time_end: string
-  venue: string
-}
+import { motion } from 'framer-motion'
 
 interface WeddingEventProps {
   akadDate: string
@@ -24,42 +15,29 @@ interface WeddingEventProps {
   venueName: string
   venueAddress: string
   venueCity: string
+  background?: string | null
 }
 
-export default function WeddingEvent({
-  akadDate,
-  akadTimeStart,
-  akadTimeEnd,
-  akadVenue,
-  resepsiDate,
-  resepsiTimeStart,
-  resepsiTimeEnd,
-  resepsiVenue,
-  venueName,
-  venueAddress,
-  venueCity,
-}: WeddingEventProps) {
-  const events = [
-    {
-      title: 'Akad Nikah',
-      date: akadDate,
-      time: `${formatTime(akadTimeStart)} - ${formatTime(akadTimeEnd)}`,
-      venue: akadVenue,
-      icon: '🤍',
-    },
-    {
-      title: 'Resepsi',
-      date: resepsiDate,
-      time: `${formatTime(resepsiTimeStart)} - ${formatTime(resepsiTimeEnd)}`,
-      venue: resepsiVenue,
-      icon: '🎉',
-    },
-  ]
+export default function WeddingEvent({ akadDate, akadTimeStart, akadTimeEnd, akadVenue, resepsiDate, resepsiTimeStart, resepsiTimeEnd, resepsiVenue, venueName, venueAddress, venueCity, background }: WeddingEventProps) {
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    } catch {
+      return dateStr
+    }
+  }
 
   return (
-    <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden bg-cream">
-      <div className="section-container">
-        {/* Section header */}
+    <section
+      className="relative py-28 md:py-36 lg:py-44 overflow-hidden"
+      style={
+        background
+          ? { backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+          : { backgroundColor: '#ffffff' }
+      }
+    >
+      {background && <div className="absolute inset-0 bg-black/50" />}
+      <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>
             <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4">Wedding Event</p>
@@ -68,55 +46,35 @@ export default function WeddingEvent({
           </ScrollReveal>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8">
-            {events.map((event, index) => (
-              <ScrollReveal
-                key={event.title}
-                variant={index === 0 ? 'left' : 'right'}
-                delay={index * 200}
-              >
-                <div className="bg-warm-white p-8 md:p-10 rounded-xl shadow-sm border border-primary/5 text-center h-full">
-                  <span className="text-4xl mb-4 block">{event.icon}</span>
-                  <h3 className="font-serif text-2xl text-charcoal mb-6">{event.title}</h3>
+        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
+          <ScrollReveal variant="left">
+            <div className="p-8 rounded-xl bg-warm-white/90 backdrop-blur-sm shadow-sm border border-primary/5 text-center">
+              <span className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4 block">Akad Nikah</span>
+              <div className="w-12 h-[1px] bg-primary/40 mx-auto mb-6" />
+              <p className="text-sm text-charcoal/60 mb-2">{formatDate(akadDate)}</p>
+              <p className="font-display text-lg text-charcoal mb-2">{akadTimeStart} - {akadTimeEnd} WIB</p>
+              <p className="text-xs text-charcoal/40">{akadVenue}</p>
+            </div>
+          </ScrollReveal>
 
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-center gap-3">
-                      <Calendar size={16} className="text-primary" />
-                      <span className="text-sm text-charcoal/70">
-                        {formatDate(event.date)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-center gap-3">
-                      <Clock size={16} className="text-primary" />
-                      <span className="text-sm text-charcoal/70">
-                        {event.time} WIB
-                      </span>
-                    </div>
-
-                    <div className="flex items-start justify-center gap-3">
-                      <MapPin size={16} className="text-primary mt-0.5" />
-                      <span className="text-sm text-charcoal/70">
-                        {event.venue}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-
-          {/* Venue info */}
-          <ScrollReveal delay={400}>
-            <div className="mt-12 text-center bg-warm-white p-8 rounded-xl shadow-sm border border-primary/5">
-              <MapPin size={20} className="text-primary mx-auto mb-3" />
-              <h4 className="font-serif text-lg text-charcoal mb-2">{venueName}</h4>
-              <p className="text-sm text-charcoal/60">{venueAddress}</p>
-              <p className="text-sm text-charcoal/50">{venueCity}</p>
+          <ScrollReveal variant="right" delay={200}>
+            <div className="p-8 rounded-xl bg-warm-white/90 backdrop-blur-sm shadow-sm border border-primary/5 text-center">
+              <span className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4 block">Resepsi</span>
+              <div className="w-12 h-[1px] bg-primary/40 mx-auto mb-6" />
+              <p className="text-sm text-charcoal/60 mb-2">{formatDate(resepsiDate)}</p>
+              <p className="font-display text-lg text-charcoal mb-2">{resepsiTimeStart} - {resepsiTimeEnd} WIB</p>
+              <p className="text-xs text-charcoal/40">{resepsiVenue}</p>
             </div>
           </ScrollReveal>
         </div>
+
+        <ScrollReveal delay={400}>
+          <div className="max-w-lg mx-auto mt-12 text-center p-6 rounded-xl bg-warm-white/90 backdrop-blur-sm shadow-sm border border-primary/5">
+            <p className="text-xs tracking-[0.2em] text-primary/60 uppercase mb-2">Lokasi</p>
+            <p className="font-serif text-base text-charcoal mb-1">{venueName}</p>
+            <p className="text-xs text-charcoal/40">{venueAddress}, {venueCity}</p>
+          </div>
+        </ScrollReveal>
       </div>
     </section>
   )

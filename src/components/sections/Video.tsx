@@ -7,9 +7,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 interface VideoProps {
   videoUrl: string | null
+  background?: string | null
 }
 
-export default function Video({ videoUrl }: VideoProps) {
+export default function Video({ videoUrl, background }: VideoProps) {
   const [isPlaying, setIsPlaying] = useState(false)
 
   if (!videoUrl) return null
@@ -24,7 +25,15 @@ export default function Video({ videoUrl }: VideoProps) {
   const embedUrl = getYoutubeEmbedUrl(videoUrl)
 
   return (
-    <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden bg-[#0a0a0a]">
+    <section
+      className="relative py-28 md:py-36 lg:py-44 overflow-hidden"
+      style={
+        background
+          ? { backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+          : { backgroundColor: '#0a0a0a' }
+      }
+    >
+      {background && <div className="absolute inset-0 bg-black/60" />}
       <div className="section-container">
         {/* Section header */}
         <div className="text-center mb-16">
