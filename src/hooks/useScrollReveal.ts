@@ -95,69 +95,67 @@ export function useCountdown(targetDate: string) {
 
 export function useAudioPlayer(audioUrl: string | null, autoPlay = false) {
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isValid, setIsValid] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
-    if (!audioUrl) return
+    if (!audioUrl) {
+      setIsValid(false)
+      return
+    }
 
     // Create audio element
-    const audio = new Audio(audioUrl)
+    const audio = new Audio()
     audio.loop = true
     audio.volume = 0.5
     audio.preload = 'auto'
+    audio.src = audioUrl
     audioRef.current = audio
 
-    // Try to autoplay if requested
-    if (autoPlay) {
-      const attemptPlay = () => {
-        const playPromise = audio.play()
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              setIsPlaying(true)
-            })
-            .catch((error) => {
-              console.log('Autoplay blocked, waiting for interaction:', error)
-              setIsPlaying(false)
-            })
-        }
+    // Validate audio source
+    const handleCanPlay = () => {
+      setIsValid(true)
+      if (autoPlay) {
+        audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
       }
+    }
 
-      // Wait for audio to be ready
-      if (audio.readyState >= 2) {
-        attemptPlay()
-      } else {
-        audio.addEventListener('canplaythrough', attemptPlay, { once: true })
-      }
+    const handleError = () => {
+      setIsValid(false)
+      setIsPlaying(false)
+      console.error('Invalid audio URL:', audioUrl)
+    }
+
+    audio.addEventListener('canplaythrough', handleCanPlay, { once: true })
+    audio.addEventListener('error', handleError, { once: true })
+
+    // If already loaded
+    if (audio.readyState >= 2) {
+      handleCanPlay()
     }
 
     return () => {
       audio.pause()
       audio.src = ''
+      audio.removeEventListener('canplaythrough', handleCanPlay)
+      audio.removeEventListener('error', handleError)
       audioRef.current = null
     }
   }, [audioUrl, autoPlay])
 
   const togglePlay = () => {
-    if (!audioRef.current) return
+    if (!audioRef.current || !isValid) return
 
     if (isPlaying) {
       audioRef.current.pause()
       setIsPlaying(false)
     } else {
-      const playPromise = audioRef.current.play()
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsPlaying(true)
-          })
-          .catch((error) => {
-            console.log('Play failed:', error)
-            setIsPlaying(false)
-          })
-      }
+      audioRef.current.play().then(() => setIsPlaying(true)).catch((error) => {
+        console.error('Play failed:', error)
+        setIsPlaying(false)
+      })
     }
   }
 
-  return { isPlaying, togglePlay }
+  return { isPlaying, togglePlay, isValid }
 }
