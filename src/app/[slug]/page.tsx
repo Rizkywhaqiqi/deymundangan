@@ -13,7 +13,10 @@ export async function generateMetadata({ params }: PageProps) {
   try {
     const invitation = await getInvitationBySlug(slug)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://triaspaisalwedding.vercel.app'
-    const ogImage = invitation.cover_image || `${baseUrl}/api/og?slug=${slug}`
+    
+    // Check if cover_image is a video (not suitable for OG image)
+    const isVideo = invitation.cover_image && /\.(mp4|webm|ogg|mov)$/i.test(invitation.cover_image)
+    const ogImage = (!invitation.cover_image || isVideo) ? `${baseUrl}/api/og?slug=${slug}` : invitation.cover_image
 
     return {
       title: `Wedding Invitation - ${invitation.groom_name} & ${invitation.bride_name}`,
