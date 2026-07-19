@@ -87,7 +87,7 @@ export default function Maps({ venueName, venueAddress, mapUrl, background }: Ma
 
         {embedUrl && (
           <ScrollReveal variant="scale">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto space-y-6">
               <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-lg">
                 <iframe
                   src={embedUrl}
@@ -99,6 +99,16 @@ export default function Maps({ venueName, venueAddress, mapUrl, background }: Ma
                   referrerPolicy="no-referrer-when-downgrade"
                   title="Google Maps"
                 />
+              </div>
+              <div className="text-center">
+                <a
+                  href={mapUrl || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-8 py-3 bg-primary text-charcoal text-sm tracking-[0.1em] uppercase rounded-full text-center hover:bg-primary-dark transition-colors"
+                >
+                  Buka Google Maps
+                </a>
               </div>
             </div>
           </ScrollReveal>
