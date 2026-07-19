@@ -216,7 +216,7 @@ export default function InvitationPage({ invitation, stories, galleries, gifts }
         {/* Footer */}
         <footer className="py-8 text-center bg-warm-white border-t border-primary/5">
           <p className="text-xs text-charcoal/40 flex items-center justify-center gap-1">
-            Made with <Heart size={12} className="text-primary" /> for
+            Made by Othkodylinz_ <Heart size={12} className="text-primary" /> for
             <span className="font-medium text-charcoal/60">{invitation.groom_name} & {invitation.bride_name}</span>
           </p>
         </footer>

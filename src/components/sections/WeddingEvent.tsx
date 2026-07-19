@@ -18,6 +18,17 @@ interface WeddingEventProps {
   background?: string | null
 }
 
+const MONTHS_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+
+function formatDateToIndonesian(dateString: string): string {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  const day = date.getDate()
+  const month = MONTHS_ID[date.getMonth()]
+  const year = date.getFullYear()
+  return `${day} ${month} ${year}`
+}
+
 export default function WeddingEvent({
   akadDate,
   akadTimeStart,
@@ -54,8 +65,8 @@ export default function WeddingEvent({
                 <div className="w-12 h-[1px] bg-primary mx-auto" />
               </div>
               <div className="space-y-3 text-sm text-warm-white/70">
-                <p className="font-medium text-warm-white text-glare-light">{akadDate}</p>
-                <p>{akadTimeStart} - {akadTimeEnd}</p>
+                <p className="font-medium text-warm-white text-glare-light">{formatDateToIndonesian(akadDate)}</p>
+                <p>{akadTimeStart} - {akadTimeEnd} WIB</p>
                 <p className="font-serif text-warm-white/80">{akadVenue}</p>
               </div>
             </div>
@@ -69,8 +80,8 @@ export default function WeddingEvent({
                 <div className="w-12 h-[1px] bg-primary mx-auto" />
               </div>
               <div className="space-y-3 text-sm text-warm-white/70">
-                <p className="font-medium text-warm-white text-glare-light">{resepsiDate}</p>
-                <p>{resepsiTimeStart} - {resepsiTimeEnd}</p>
+                <p className="font-medium text-warm-white text-glare-light">{formatDateToIndonesian(resepsiDate)}</p>
+                <p>{resepsiTimeStart} - {resepsiTimeEnd} WIB</p>
                 <p className="font-serif text-warm-white/80">{resepsiVenue}</p>
               </div>
             </div>
