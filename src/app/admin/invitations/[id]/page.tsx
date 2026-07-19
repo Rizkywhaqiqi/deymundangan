@@ -1,14 +1,22 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { getInvitationById, updateInvitation, getCurrentUser } from '@/services/invitation'
-import { Heart, ArrowLeft, Save, ChevronDown, ChevronUp, Image } from 'lucide-react'
+import { getInvitationById, updateInvitation, getCurrentUser, getStories, createStory, updateStory, deleteStory } from '@/services/invitation'
+import { Heart, ArrowLeft, Save, ChevronDown, ChevronUp, Image, Plus, Trash2, Edit } from 'lucide-react'
 import Link from 'next/link'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FormData = Record<string, any>
+
+interface Story {
+  id: string
+  title: string
+  description: string
+  year: string
+  order: number
+}
 
 const SECTIONS = [
   { key: 'opening', label: 'Opening' },
@@ -52,12 +60,61 @@ function SectionAccordion({ section, value, onChange }: { section: { key: string
   )
 }
 
+function StoryItem({ story, onUpdate, onDelete }: { story: Story; onUpdate: (story: Story) => void; onDelete: (id: string) => void }) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editData, setEditData] = useState({ title: story.title, description: story.description, year: story.year })
+
+  const handleSave = () => {
+    onUpdate({ ...story, ...editData })
+    setIsEditing(false)
+  }
+
+  if (isEditing) {
+    return (
+      <div className="p-4 bg-cream rounded-lg space-y-3">
+        <input value={editData.title} onChange={(e) => setEditData({ ...editData, title: e.target.value })} placeholder="Judul" className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm" />
+        <textarea value={editData.description} onChange={(e) => setEditData({ ...editData, description: e.target.value })} rows={3} placeholder="Deskripsi" className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm resize-none" />
+        <input type="number" value={editData.year} onChange={(e) => setEditData({ ...editData, year: e.target.value })} placeholder="Tahun" className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm" />
+        <div className="flex gap-2">
+          <button type="button" onClick={handleSave} className="px-3 py-1.5 bg-primary text-charcoal text-xs rounded-full">Simpan</button>
+          <button type="button" onClick={() => setIsEditing(false)} className="px-3 py-1.5 bg-charcoal/10 text-charcoal text-xs rounded-full">Batal</button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-4 bg-cream rounded-lg">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h4 className="font-serif text-sm text-charcoal">{story.title}</h4>
+            <span className="text-xs text-charcoal/40">({story.year})</span>
+          </div>
+          <p className="text-xs text-charcoal/60 line-clamp-2">{story.description}</p>
+        </div>
+        <div className="flex gap-1 ml-2">
+          <button type="button" onClick={() => setIsEditing(true)} className="p-1.5 text-charcoal/40 hover:text-primary transition-colors">
+            <Edit size={14} />
+          </button>
+          <button type="button" onClick={() => onDelete(story.id)} className="p-1.5 text-charcoal/40 hover:text-red-500 transition-colors">
+            <Trash2 size={14} />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function EditInvitationPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const [id, setId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<FormData>({})
+  const [stories, setStories] = useState<Story[]>([])
+  const [newStory, setNewStory] = useState({ title: '', description: '', year: '' })
+  const [isAddingStory, setIsAddingStory] = useState(false)
 
   useEffect(() => {
     const init = async () => {
@@ -68,6 +125,8 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
         if (!user) { router.push('/admin/login'); return }
         const invitation = await getInvitationById(invitationId)
         setFormData(invitation as FormData)
+        const storiesData = await getStories(invitationId)
+        setStories((storiesData as Story[]) || [])
       } catch { router.push('/admin/dashboard') }
       finally { setIsLoading(false) }
     }
@@ -84,6 +143,40 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
       ...prev,
       backgrounds: { ...(prev.backgrounds as Record<string, string> || {}), [section]: value },
     }))
+  }
+
+  const handleAddStory = async () => {
+    if (!id || !newStory.title || !newStory.description || !newStory.year) return
+    try {
+      const story = await createStory({
+        invitation_id: id,
+        ...newStory,
+        order: stories.length,
+      })
+      setStories([...stories, story as Story])
+      setNewStory({ title: '', description: '', year: '' })
+      setIsAddingStory(false)
+    } catch (error) {
+      console.error('Error creating story:', error)
+    }
+  }
+
+  const handleUpdateStory = async (updatedStory: Story) => {
+    try {
+      await updateStory(updatedStory.id, updatedStory as unknown as Record<string, unknown>)
+      setStories(stories.map((s) => (s.id === updatedStory.id ? updatedStory : s)))
+    } catch (error) {
+      console.error('Error updating story:', error)
+    }
+  }
+
+  const handleDeleteStory = async (storyId: string) => {
+    try {
+      await deleteStory(storyId)
+      setStories(stories.filter((s) => s.id !== storyId))
+    } catch (error) {
+      console.error('Error deleting story:', error)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -126,9 +219,7 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
             <h2 className="font-serif text-lg text-charcoal mb-6">Quick Actions</h2>
             <div className="flex flex-wrap gap-3">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" name="is_published" checked={!!formData.is_published}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, is_published: e.target.checked }))}
-                  className="w-4 h-4 rounded border-primary/30 text-primary focus:ring-primary" />
+                <input type="checkbox" name="is_published" checked={!!formData.is_published} onChange={(e) => setFormData((prev) => ({ ...prev, is_published: e.target.checked }))} className="w-4 h-4 rounded border-primary/30 text-primary focus:ring-primary" />
                 <span className="text-sm text-charcoal/70">Publikasikan</span>
               </label>
               {formData.slug && (
@@ -334,6 +425,42 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
             </div>
           </section>
 
+          {/* Love Story */}
+          <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-serif text-lg text-charcoal">Love Story</h2>
+              <button type="button" onClick={() => setIsAddingStory(!isAddingStory)} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-charcoal text-xs rounded-full hover:bg-primary-dark transition-colors">
+                <Plus size={14} /> Tambah
+              </button>
+            </div>
+
+            {/* Add new story form */}
+            <AnimatePresence>
+              {isAddingStory && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mb-4 p-4 bg-cream rounded-lg space-y-3">
+                  <input value={newStory.title} onChange={(e) => setNewStory({ ...newStory, title: e.target.value })} placeholder="Judul cerita" className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm" />
+                  <textarea value={newStory.description} onChange={(e) => setNewStory({ ...newStory, description: e.target.value })} rows={3} placeholder="Deskripsi" className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm resize-none" />
+                  <input type="number" value={newStory.year} onChange={(e) => setNewStory({ ...newStory, year: e.target.value })} placeholder="Tahun" className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm" />
+                  <div className="flex gap-2">
+                    <button type="button" onClick={handleAddStory} className="px-3 py-1.5 bg-primary text-charcoal text-xs rounded-full">Simpan</button>
+                    <button type="button" onClick={() => setIsAddingStory(false)} className="px-3 py-1.5 bg-charcoal/10 text-charcoal text-xs rounded-full">Batal</button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Stories list */}
+            <div className="space-y-3">
+              {stories.length === 0 ? (
+                <p className="text-sm text-charcoal/40 text-center py-8">Belum ada love story. Klik "Tambah" untuk menambahkan.</p>
+              ) : (
+                stories.map((story) => (
+                  <StoryItem key={story.id} story={story} onUpdate={handleUpdateStory} onDelete={handleDeleteStory} />
+                ))
+              )}
+            </div>
+          </section>
+
           {/* Foto Mempelai */}
           <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
             <div className="flex items-center gap-2 mb-2">
@@ -374,9 +501,7 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
             <p className="text-xs text-charcoal/40 mb-6">Klik section untuk expand, paste link gambar. Biarkan kosong untuk default.</p>
             <div className="space-y-2">
               {SECTIONS.map((section) => (
-                <SectionAccordion key={section.key} section={section}
-                  value={((formData.backgrounds as Record<string, string>)?.[section.key]) || ''}
-                  onChange={(val) => handleBackgroundChange(section.key, val)} />
+                <SectionAccordion key={section.key} section={section} value={((formData.backgrounds as Record<string, string>)?.[section.key]) || ''} onChange={(val) => handleBackgroundChange(section.key, val)} />
               ))}
             </div>
           </section>
