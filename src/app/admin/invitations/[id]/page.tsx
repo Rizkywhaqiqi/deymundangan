@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { getInvitationById, updateInvitation, getCurrentUser, getStories, createStory, updateStory, deleteStory, getGalleries, createGallery, deleteGallery } from '@/services/invitation'
+import { getInvitationById, updateInvitation, getCurrentUser, getStories, createStory, updateStory, deleteStory, getGalleries, createGallery, deleteGallery, getGifts, createGift, deleteGift } from '@/services/invitation'
 import { Heart, ArrowLeft, Save, ChevronDown, ChevronUp, Image, Plus, Trash2, Edit } from 'lucide-react'
 import Link from 'next/link'
 
@@ -23,6 +23,13 @@ interface Gallery {
   image_url: string
   caption: string | null
   order: number
+}
+
+interface Gift {
+  id: string
+  bank_name: string
+  account_name: string
+  account_number: string
 }
 
 const SECTIONS = [
@@ -145,6 +152,9 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
   const [galleries, setGalleries] = useState<Gallery[]>([])
   const [newGallery, setNewGallery] = useState({ image_url: '', caption: '' })
   const [isAddingGallery, setIsAddingGallery] = useState(false)
+  const [gifts, setGifts] = useState<Gift[]>([])
+  const [newGift, setNewGift] = useState({ bank_name: '', account_name: '', account_number: '' })
+  const [isAddingGift, setIsAddingGift] = useState(false)
 
   useEffect(() => {
     const init = async () => {
@@ -159,6 +169,8 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
         setStories((storiesData as Story[]) || [])
         const galleriesData = await getGalleries(invitationId)
         setGalleries((galleriesData as Gallery[]) || [])
+        const giftsData = await getGifts(invitationId)
+        setGifts((giftsData as Gift[]) || [])
       } catch { router.push('/admin/dashboard') }
       finally { setIsLoading(false) }
     }
@@ -234,6 +246,31 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
       setGalleries(galleries.filter((g) => g.id !== galleryId))
     } catch (error) {
       console.error('Error deleting gallery:', error)
+    }
+  }
+
+  const handleAddGift = async () => {
+    if (!id || !newGift.bank_name || !newGift.account_name || !newGift.account_number) return
+    try {
+      const gift = await createGift({
+        invitation_id: id,
+        ...newGift,
+        is_active: true,
+      })
+      setGifts([...gifts, gift as Gift])
+      setNewGift({ bank_name: '', account_name: '', account_number: '' })
+      setIsAddingGift(false)
+    } catch (error) {
+      console.error('Error creating gift:', error)
+    }
+  }
+
+  const handleDeleteGift = async (giftId: string) => {
+    try {
+      await deleteGift(giftId)
+      setGifts(gifts.filter((g) => g.id !== giftId))
+    } catch (error) {
+      console.error('Error deleting gift:', error)
     }
   }
 
@@ -549,6 +586,55 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
               ) : (
                 galleries.map((gallery) => (
                   <GalleryItem key={gallery.id} gallery={gallery} onDelete={handleDeleteGallery} />
+                ))
+              )}
+            </div>
+          </section>
+
+          {/* Wedding Gift */}
+          <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-serif text-lg text-charcoal">Wedding Gift</h2>
+              <button type="button" onClick={() => setIsAddingGift(!isAddingGift)} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-charcoal text-xs rounded-full hover:bg-primary-dark transition-colors">
+                <Plus size={14} /> Tambah
+              </button>
+            </div>
+
+            {/* Add new gift form */}
+            <AnimatePresence>
+              {isAddingGift && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mb-4 p-4 bg-cream rounded-lg space-y-3">
+                  <input value={newGift.bank_name} onChange={(e) => setNewGift({ ...newGift, bank_name: e.target.value })} placeholder="Nama Bank" className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm" />
+                  <input value={newGift.account_name} onChange={(e) => setNewGift({ ...newGift, account_name: e.target.value })} placeholder="Atas Nama" className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm" />
+                  <input value={newGift.account_number} onChange={(e) => setNewGift({ ...newGift, account_number: e.target.value })} placeholder="No. Rekening" className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm" />
+                  <div className="flex gap-2">
+                    <button type="button" onClick={handleAddGift} className="px-3 py-1.5 bg-primary text-charcoal text-xs rounded-full">Simpan</button>
+                    <button type="button" onClick={() => setIsAddingGift(false)} className="px-3 py-1.5 bg-charcoal/10 text-charcoal text-xs rounded-full">Batal</button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Gifts list */}
+            <div className="space-y-3">
+              {gifts.length === 0 ? (
+                <p className="text-sm text-charcoal/40 text-center py-8">Belum ada data hadiah. Klik "Tambah" untuk menambahkan.</p>
+              ) : (
+                gifts.map((gift, index) => (
+                  <div key={gift.id} className="p-4 bg-cream rounded-lg">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-serif text-sm text-charcoal mb-2">{gift.bank_name}</h4>
+                        <div className="space-y-1 text-xs text-charcoal/60">
+                          <p>Atas Nama: <span className="font-medium text-charcoal">{gift.account_name}</span></p>
+                          <p>No. Rekening: <span className="font-medium text-charcoal">{gift.account_number}</span></p>
+                        </div>
+                      </div>
+                      <button type="button" onClick={() => handleDeleteGift(gift.id)} className="p-1.5 text-charcoal/40 hover:text-red-500 transition-colors flex-shrink-0 ml-2">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
                 ))
               )}
             </div>
