@@ -20,51 +20,51 @@ export default function Maps({ venueName, venueAddress, mapUrl, background }: Ma
       return
     }
 
-    // Helper to check if URL is a valid Google Maps URL for embedding
-    const isGoogleMapsUrl = mapUrl.includes('maps.google.com') || mapUrl.includes('google.com/maps') || mapUrl.includes('goo.gl/maps')
+    // Detect if it's a Google Maps URL
+    const isMapsUrl = mapUrl.includes('maps.google.com') || mapUrl.includes('google.com/maps') || mapUrl.includes('goo.gl/maps')
 
-    if (!isGoogleMapsUrl) {
-      // Not a Google Maps URL, show link button instead
+    if (!isMapsUrl) {
+      // Not a Google Maps URL - show link button
       setEmbedUrl(null)
       return
     }
 
-    // Handle goo.gl short URLs - can't embed
-    if (mapUrl.includes('goo.gl/maps')) {
-      setEmbedUrl(null)
-      return
-    }
+    // Try to extract location from URL first
+    let location = ''
 
-    // Try to extract @lat,lng,zoom pattern
-    const coordPattern = /@(-?\d+\.\d+),(-?\d+\.\d+)/
-    const coordMatch = mapUrl.match(coordPattern)
-
+    // Extract coordinates (@lat,lng)
+    const coordMatch = mapUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
     if (coordMatch) {
-      const lat = coordMatch[1]
-      const lng = coordMatch[2]
-      setEmbedUrl(`https://www.google.com/maps/embed/v1/view?center=${lat},${lng}&zoom=15`)
+      location = `${coordMatch[1]},${coordMatch[2]}`
+      setEmbedUrl(`https://maps.google.com/maps?q=${location}&t=&z=15&ie=UTF8&iwloc=&output=embed`)
       return
     }
 
-    // Extract place name
+    // Extract place name from /place/NAME
     const placeMatch = mapUrl.match(/place\/([^/?]+)/)
-    const queryMatch = mapUrl.match(/[?&]q=([^&]+)/)
-
     if (placeMatch) {
-      const placeName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '))
-      setEmbedUrl(`https://www.google.com/maps/embed/v1/place?q=${encodeURIComponent(placeName)}`)
+      location = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '))
+      setEmbedUrl(`https://maps.google.com/maps?q=${encodeURIComponent(location)}&t=&z=15&ie=UTF8&iwloc=&output=embed`)
       return
     }
 
+    // Extract from ?q=QUERY
+    const queryMatch = mapUrl.match(/[?&]q=([^&]+)/)
     if (queryMatch) {
-      const query = decodeURIComponent(queryMatch[1].replace(/\+/g, ' '))
-      setEmbedUrl(`https://www.google.com/maps/embed/v1/place?q=${encodeURIComponent(query)}`)
+      location = decodeURIComponent(queryMatch[1].replace(/\+/g, ' '))
+      setEmbedUrl(`https://maps.google.com/maps?q=${encodeURIComponent(location)}&t=&z=15&ie=UTF8&iwloc=&output=embed`)
       return
     }
 
-    // Fallback: show link button
+    // Fallback: use the venue name as search query
+    if (venueName) {
+      setEmbedUrl(`https://maps.google.com/maps?q=${encodeURIComponent(venueName + ', ' + venueAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`)
+      return
+    }
+
+    // If nothing works, show link button
     setEmbedUrl(null)
-  }, [mapUrl])
+  }, [mapUrl, venueName, venueAddress])
 
   return (
     <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden">
@@ -85,32 +85,36 @@ export default function Maps({ venueName, venueAddress, mapUrl, background }: Ma
           </ScrollReveal>
         </div>
 
-        {mapUrl && (
+        {embedUrl && (
           <ScrollReveal variant="scale">
             <div className="max-w-4xl mx-auto">
-              {embedUrl ? (
-                <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-lg">
-                  <iframe
-                    src={embedUrl}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Google Maps"
-                  />
-                </div>
-              ) : (
-                <a
-                  href={mapUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full px-6 py-4 bg-primary text-charcoal text-sm tracking-[0.1em] uppercase rounded-full text-center hover:bg-primary-dark transition-colors"
-                >
-                  Buka Google Maps
-                </a>
-              )}
+              <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-lg">
+                <iframe
+                  src={embedUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Google Maps"
+                />
+              </div>
+            </div>
+          </ScrollReveal>
+        )}
+
+        {!embedUrl && mapUrl && (
+          <ScrollReveal variant="scale">
+            <div className="max-w-lg mx-auto">
+              <a
+                href={mapUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full px-6 py-4 bg-primary text-charcoal text-sm tracking-[0.1em] uppercase rounded-full text-center hover:bg-primary-dark transition-colors"
+              >
+                Buka Google Maps
+              </a>
             </div>
           </ScrollReveal>
         )}
