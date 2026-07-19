@@ -91,3 +91,4 @@ Error `null value in column "id"` terjadi karena query INSERT ke tabel `profiles
 2. Copy **UUID** (User ID) yang muncul setelah create user
 3. Gunakan UUID tersebut di query INSERT
 4. Atau jalankan `SELECT id, email FROM auth.users` untuk melihat daftar user
+
