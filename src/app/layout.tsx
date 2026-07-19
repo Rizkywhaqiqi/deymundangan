@@ -35,6 +35,10 @@ export const metadata: Metadata = {
     template: '%s | Wedding Invitation',
   },
   description: 'Undangan Pernikahan Digital Premium',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({
