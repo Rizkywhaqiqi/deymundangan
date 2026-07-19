@@ -12,13 +12,33 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params
   try {
     const invitation = await getInvitationBySlug(slug)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://triaspaisalwedding.vercel.app'
+    const ogImage = invitation.cover_image || `${baseUrl}/api/og?slug=${slug}`
+
     return {
       title: `Wedding Invitation - ${invitation.groom_name} & ${invitation.bride_name}`,
       description: `Undangan Pernikahan ${invitation.groom_name} & ${invitation.bride_name} - ${new Date(invitation.wedding_date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`,
       openGraph: {
         title: `${invitation.groom_name} & ${invitation.bride_name}`,
-        description: `Undangan Pernikahan`,
+        description: `Undangan Pernikahan ${invitation.groom_name} & ${invitation.bride_name}`,
         type: 'website',
+        url: `${baseUrl}/${slug}`,
+        siteName: 'Wedding Invitation',
+        images: [
+          {
+            url: ogImage,
+            width: 1200,
+            height: 630,
+            alt: `${invitation.groom_name} & ${invitation.bride_name} - Wedding Invitation`,
+          },
+        ],
+        locale: 'id_ID',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${invitation.groom_name} & ${invitation.bride_name}`,
+        description: `Undangan Pernikahan`,
+        images: [ogImage],
       },
     }
   } catch {
