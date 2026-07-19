@@ -157,6 +157,7 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
   const [isAddingGift, setIsAddingGift] = useState(false)
   const [guestName, setGuestName] = useState('')
   const [generatedLink, setGeneratedLink] = useState('')
+  const [generatedText, setGeneratedText] = useState('')
 
   useEffect(() => {
     const init = async () => {
@@ -306,6 +307,60 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
     }
   }
 
+  const generateInvitationText = () => {
+    if (!formData.slug) return
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://triaspaisalwedding.vercel.app'
+    const slug = formData.slug as string
+    const guest = guestName || 'Bapak/Ibu/Saudara/i'
+    const groomFull = (formData.groom_name as string) || ''
+    const groomNick = (formData.groom_nickname as string) || ''
+    const brideFull = (formData.bride_name as string) || ''
+    const brideNick = (formData.bride_nickname as string) || ''
+    const weddingDate = formData.wedding_date as string
+    const akadTime = `${formData.akad_time_start as string} – ${formData.akad_time_end as string} WIB`
+    const resepsiTime = `${formData.resepsi_time_start as string} – ${formData.resepsi_time_end as string} WIB`
+    const venue = `${formData.venue_name as string} (${formData.venue_address as string}, ${formData.venue_city as string})`
+    const link = `${baseUrl}/${slug}?to=${encodeURIComponent(guestName || '')}`
+
+    const text = `Assalamu'alaikum Warahmatullahi Wabarakatuh.
+
+Tanpa mengurangi rasa hormat, izinkan kami mengundang "${guest}" untuk menghadiri dan memberikan doa restu pada acara pernikahan kami:
+
+"${groomFull}" "${groomNick}"
+&
+"${brideFull}" "${brideNick}"
+
+Berikut detail acara kami yang akan dilaksanakan pada:
+📅 Hari/Tanggal: ${new Date(weddingDate).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+⏰ Akad: ${akadTime}
+⏰ Resepsi: ${resepsiTime}
+📍 Tempat: ${venue}
+
+Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila "${guest}" berkenan hadir. Informasi lengkap mengenai informasi undangan dapat diakses melalui tautan undangan digital di bawah ini:
+
+🔗 ${link}
+
+Wassalamu'alaikum Warahmatullahi Wabarakatuh.
+
+Kami yang berbahagia,
+
+"${groomNick}"
+&
+"${brideNick}"`
+
+    setGeneratedText(text)
+  }
+
+  const copyTextToClipboard = async () => {
+    if (!generatedText) return
+    try {
+      await navigator.clipboard.writeText(generatedText)
+      alert('Teks undangan berhasil disalin!')
+    } catch {
+      alert('Gagal menyalin teks')
+    }
+  }
+
   if (isLoading) return (
     <div className="min-h-screen flex items-center justify-center bg-warm-white">
       <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -392,6 +447,33 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
                         Copy
                       </button>
                     </div>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={generateInvitationText}
+                  disabled={!formData.slug}
+                  className="mt-4 px-6 py-3 bg-primary text-charcoal text-sm tracking-[0.1em] uppercase rounded-full hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Generate Teks Undangan
+                </button>
+                {generatedText && (
+                  <div className="mt-4 p-4 bg-cream rounded-lg">
+                    <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Teks Undangan (WhatsApp/Media Sosial)</label>
+                    <textarea
+                      value={generatedText}
+                      readOnly
+                      rows={20}
+                      className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm text-charcoal focus:outline-none resize-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={copyTextToClipboard}
+                      className="mt-2 px-4 py-2 bg-primary text-charcoal text-xs rounded-full hover:bg-primary-dark transition-colors"
+                    >
+                      Copy Teks
+                    </button>
                   </div>
                 )}
               </div>
