@@ -155,6 +155,8 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
   const [gifts, setGifts] = useState<Gift[]>([])
   const [newGift, setNewGift] = useState({ bank_name: '', account_name: '', account_number: '' })
   const [isAddingGift, setIsAddingGift] = useState(false)
+  const [guestName, setGuestName] = useState('')
+  const [generatedLink, setGeneratedLink] = useState('')
 
   useEffect(() => {
     const init = async () => {
@@ -285,6 +287,25 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
     finally { setIsSubmitting(false) }
   }
 
+  const generatePersonalizedLink = () => {
+    if (!id || !formData.slug) return
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://triaspaisalwedding.vercel.app'
+    const slug = formData.slug as string
+    const encodedName = encodeURIComponent(guestName)
+    const link = `${baseUrl}/${slug}?to=${encodedName}`
+    setGeneratedLink(link)
+  }
+
+  const copyToClipboard = async () => {
+    if (!generatedLink) return
+    try {
+      await navigator.clipboard.writeText(generatedLink)
+      alert('Link berhasil disalin!')
+    } catch {
+      alert('Gagal menyalin link')
+    }
+  }
+
   if (isLoading) return (
     <div className="min-h-screen flex items-center justify-center bg-warm-white">
       <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -312,7 +333,7 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
           {/* Quick Actions */}
           <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
             <h2 className="font-serif text-lg text-charcoal mb-6">Quick Actions</h2>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 mb-6">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" name="is_published" checked={!!formData.is_published} onChange={(e) => setFormData((prev) => ({ ...prev, is_published: e.target.checked }))} className="w-4 h-4 rounded border-primary/30 text-primary focus:ring-primary" />
                 <span className="text-sm text-charcoal/70">Publikasikan</span>
@@ -328,6 +349,52 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
               <Link href={`/admin/invitations/${id}/wishes`} className="text-xs text-primary hover:text-primary-dark underline flex items-center gap-1">
                 <MessageCircle size={14} /> Kelola Ucapan
               </Link>
+            </div>
+
+            {/* Link Generator */}
+            <div className="border-t border-primary/10 pt-6">
+              <h3 className="font-serif text-base text-charcoal mb-4">Generate Link Personalisasi</h3>
+              <p className="text-xs text-charcoal/50 mb-4">Buat link undangan dengan nama tamu tanpa menyimpan ke database.</p>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Nama Tamu</label>
+                  <input
+                    type="text"
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    placeholder="Contoh: Bapak Joko Widodo"
+                    className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={generatePersonalizedLink}
+                  disabled={!guestName.trim()}
+                  className="px-6 py-3 bg-primary text-charcoal text-sm tracking-[0.1em] uppercase rounded-full hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Generate Link
+                </button>
+                {generatedLink && (
+                  <div className="mt-4 p-4 bg-cream rounded-lg">
+                    <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Link Personalisasi</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={generatedLink}
+                        readOnly
+                        className="flex-1 px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm text-charcoal focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={copyToClipboard}
+                        className="px-4 py-2 bg-primary text-charcoal text-xs rounded-full hover:bg-primary-dark transition-colors"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 
