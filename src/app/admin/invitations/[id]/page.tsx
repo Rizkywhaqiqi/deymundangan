@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getInvitationById, updateInvitation, getCurrentUser, getStories, createStory, updateStory, deleteStory, getGalleries, createGallery, deleteGallery, getGifts, createGift, deleteGift } from '@/services/invitation'
-import { Heart, ArrowLeft, Save, ChevronDown, ChevronUp, Image, Plus, Trash2, Edit } from 'lucide-react'
+import { Heart, ArrowLeft, Save, ChevronDown, ChevronUp, Image, Plus, Trash2, Edit, Users, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -322,6 +322,12 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
                   Lihat halaman →
                 </a>
               )}
+              <Link href={`/admin/invitations/${id}/rsvp`} className="text-xs text-primary hover:text-primary-dark underline flex items-center gap-1">
+                <Users size={14} /> Kelola RSVP
+              </Link>
+              <Link href={`/admin/invitations/${id}/wishes`} className="text-xs text-primary hover:text-primary-dark underline flex items-center gap-1">
+                <MessageCircle size={14} /> Kelola Ucapan
+              </Link>
             </div>
           </section>
 

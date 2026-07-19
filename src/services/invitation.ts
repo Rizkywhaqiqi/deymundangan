@@ -214,6 +214,17 @@ export async function getRSVPs(invitationId: string) {
   return data
 }
 
+export async function deleteRSVP(id: string) {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('rsvp')
+    .delete()
+    .eq('id', id)
+
+  if (error) throw error
+  return true
+}
+
 // ========== WISHES ==========
 
 export async function getWishes(invitationId: string) {
