@@ -126,7 +126,7 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen, inv
                 transition={{ duration: 0.8, delay: 2.0 }}
                 className="text-sm tracking-[0.2em] text-primary uppercase font-light mb-6 text-glare"
               >
-                Yth. {invitedGuestName}
+                Kepada Yth. {invitedGuestName}
               </motion.p>
             )}
             <motion.button
