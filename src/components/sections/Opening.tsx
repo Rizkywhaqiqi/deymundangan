@@ -77,37 +77,27 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen, inv
               transition={{ duration: 1.5, delay: 0.3 }}
               className="w-16 h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent mx-auto mb-8"
             />
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-              className="text-sm tracking-[0.3em] text-primary/80 uppercase font-light mb-6 text-glare"
-            >
-              The Wedding Of
-            </motion.p>
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.8 }}
-              className="font-display text-5xl md:text-7xl lg:text-8xl text-warm-white mb-2 leading-tight text-glare"
+              className="font-display text-3xl md:text-5xl lg:text-6xl text-warm-white mb-2 leading-tight text-glare"
             >
               {groomName}
             </motion.h1>
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 1.2 }}
-              className="flex items-center justify-center gap-4 my-4"
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.1 }}
+              className="font-display text-2xl md:text-3xl text-primary mb-4 text-glare"
             >
-              <div className="w-12 h-[1px] bg-primary/60" />
-              <span className="font-display text-2xl text-primary text-glare">&</span>
-              <div className="w-12 h-[1px] bg-primary/60" />
-            </motion.div>
+              &
+            </motion.p>
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 1.4 }}
-              className="font-display text-5xl md:text-7xl lg:text-8xl text-warm-white mb-8 leading-tight text-glare"
+              className="font-display text-3xl md:text-5xl lg:text-6xl text-warm-white mb-6 leading-tight text-glare"
             >
               {brideName}
             </motion.h1>
@@ -115,24 +105,34 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen, inv
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.8 }}
-              className="text-sm tracking-[0.2em] text-warm-white/60 uppercase mb-8 text-glare-light"
+              className="text-xs tracking-[0.2em] text-warm-white/60 uppercase mb-10 text-glare-light"
             >
               {weddingDate}
             </motion.p>
             {invitedGuestName && (
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 2.0 }}
-                className="text-sm tracking-[0.2em] text-primary uppercase font-light mb-6 text-glare"
-              >
-                Kepada Yth. {invitedGuestName}
-              </motion.p>
+              <>
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 2.0 }}
+                  className="text-sm tracking-[0.2em] text-primary uppercase font-light mb-2 text-glare"
+                >
+                  Kepada Yth.
+                </motion.p>
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 2.2 }}
+                  className="text-sm md:text-base text-warm-white/90 font-light mb-8 text-glare"
+                >
+                  {invitedGuestName}
+                </motion.p>
+              </>
             )}
             <motion.button
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 2.2 }}
+              transition={{ duration: 0.8, delay: 2.4 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleOpen}
