@@ -120,18 +120,80 @@
   }
 
   .glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .glass-dark {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  /* More visible scroll reveal animations */
+  /* Glass card with glare effect - for content sections on backgrounds */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle at 30% 20%,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 50%
+    );
+    pointer-events: none;
+  }
+
+  /* Content glass layer - put behind text to make it readable */
+  .content-glass {
+    position: relative;
+    z-index: 1;
+  }
+
+  .content-glass::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      transparent 100%
+    );
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: inherit;
+    z-index: -1;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* Glare effect for text readability */
+  .text-glare {
+    text-shadow:
+      0 2px 12px rgba(0, 0, 0, 0.5),
+      0 0 40px rgba(0, 0, 0, 0.2);
+  }
+
+  .text-glare-light {
+    text-shadow:
+      0 1px 8px rgba(0, 0, 0, 0.3),
+      0 0 20px rgba(0, 0, 0, 0.1);
+  }
+
   .scroll-reveal {
     opacity: 0;
     transform: translateY(40px);

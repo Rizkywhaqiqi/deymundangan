@@ -24,8 +24,8 @@ export default function LoveStory({ stories, background }: LoveStoryProps) {
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>
-            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4">Our Journey</p>
-            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4">Love Story</h2>
+            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4 text-glare-light">Our Journey</p>
+            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4 text-glare">Love Story</h2>
             <div className="w-16 h-[1px] bg-primary mx-auto" />
           </ScrollReveal>
         </div>
@@ -37,15 +37,17 @@ export default function LoveStory({ stories, background }: LoveStoryProps) {
             <div className="space-y-8">
               {stories.map((story, index) => (
                 <ScrollReveal key={story.id} delay={index * 100}>
-                  <div className="flex gap-6 items-start">
-                    <div className="flex-shrink-0">
-                      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="font-display text-2xl text-primary">{story.year}</span>
+                  <div className="glass-card rounded-xl p-6 md:p-8">
+                    <div className="flex gap-6 items-start">
+                      <div className="flex-shrink-0">
+                        <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center backdrop-blur-sm border border-primary/20">
+                          <span className="font-display text-2xl text-primary text-glare">{story.year}</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-serif text-xl text-charcoal mb-2">{story.title}</h3>
-                      <p className="text-sm text-charcoal/60 leading-relaxed">{story.description}</p>
+                      <div className="flex-1">
+                        <h3 className="font-serif text-xl text-warm-white mb-2 text-glare">{story.title}</h3>
+                        <p className="text-sm text-warm-white/70 leading-relaxed">{story.description}</p>
+                      </div>
                     </div>
                   </div>
                 </ScrollReveal>

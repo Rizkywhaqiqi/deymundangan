@@ -23,8 +23,8 @@ export default function WeddingGift({ gifts, background }: WeddingGiftProps) {
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>
-            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4">Wedding Gift</p>
-            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4">Hadiah Pernikahan</h2>
+            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4 text-glare-light">Wedding Gift</p>
+            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4 text-glare">Hadiah Pernikahan</h2>
             <div className="w-16 h-[1px] bg-primary mx-auto" />
           </ScrollReveal>
         </div>
@@ -36,11 +36,11 @@ export default function WeddingGift({ gifts, background }: WeddingGiftProps) {
             <div className="grid gap-4">
               {gifts.map((gift, index) => (
                 <ScrollReveal key={gift.id} delay={index * 100}>
-                  <div className="bg-white/90 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-primary/10">
-                    <h3 className="font-serif text-lg text-charcoal mb-3">{gift.bank_name}</h3>
-                    <div className="space-y-2 text-sm">
-                      <p className="text-charcoal/60">Atas Nama: <span className="font-medium text-charcoal">{gift.account_name}</span></p>
-                      <p className="text-charcoal/60">No. Rekening: <span className="font-medium text-charcoal">{gift.account_number}</span></p>
+                  <div className="glass-card rounded-xl p-6">
+                    <h3 className="font-serif text-lg text-warm-white mb-3 text-glare">{gift.bank_name}</h3>
+                    <div className="space-y-2 text-sm text-warm-white/70">
+                      <p>Atas Nama: <span className="font-medium text-warm-white text-glare-light">{gift.account_name}</span></p>
+                      <p>No. Rekening: <span className="font-medium text-warm-white text-glare-light">{gift.account_number}</span></p>
                     </div>
                   </div>
                 </ScrollReveal>

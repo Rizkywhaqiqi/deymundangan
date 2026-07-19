@@ -20,19 +20,20 @@ export default function Maps({ venueName, venueAddress, mapUrl, background }: Ma
       return
     }
 
-    // Detect if it's a Google Maps URL
     const isMapsUrl = mapUrl.includes('maps.google.com') || mapUrl.includes('google.com/maps') || mapUrl.includes('goo.gl/maps')
 
     if (!isMapsUrl) {
-      // Not a Google Maps URL - show link button
       setEmbedUrl(null)
       return
     }
 
-    // Try to extract location from URL first
+    if (mapUrl.includes('goo.gl/maps')) {
+      setEmbedUrl(null)
+      return
+    }
+
     let location = ''
 
-    // Extract coordinates (@lat,lng)
     const coordMatch = mapUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
     if (coordMatch) {
       location = `${coordMatch[1]},${coordMatch[2]}`
@@ -40,7 +41,6 @@ export default function Maps({ venueName, venueAddress, mapUrl, background }: Ma
       return
     }
 
-    // Extract place name from /place/NAME
     const placeMatch = mapUrl.match(/place\/([^/?]+)/)
     if (placeMatch) {
       location = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '))
@@ -48,7 +48,6 @@ export default function Maps({ venueName, venueAddress, mapUrl, background }: Ma
       return
     }
 
-    // Extract from ?q=QUERY
     const queryMatch = mapUrl.match(/[?&]q=([^&]+)/)
     if (queryMatch) {
       location = decodeURIComponent(queryMatch[1].replace(/\+/g, ' '))
@@ -56,13 +55,11 @@ export default function Maps({ venueName, venueAddress, mapUrl, background }: Ma
       return
     }
 
-    // Fallback: use the venue name as search query
     if (venueName) {
       setEmbedUrl(`https://maps.google.com/maps?q=${encodeURIComponent(venueName + ', ' + venueAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`)
       return
     }
 
-    // If nothing works, show link button
     setEmbedUrl(null)
   }, [mapUrl, venueName, venueAddress])
 
@@ -72,23 +69,23 @@ export default function Maps({ venueName, venueAddress, mapUrl, background }: Ma
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>
-            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4">Location</p>
-            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4">Lokasi Acara</h2>
+            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4 text-glare-light">Location</p>
+            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4 text-glare">Lokasi Acara</h2>
             <div className="w-16 h-[1px] bg-primary mx-auto" />
           </ScrollReveal>
         </div>
 
         <div className="max-w-2xl mx-auto text-center mb-8">
           <ScrollReveal>
-            <p className="font-serif text-xl text-charcoal mb-2">{venueName}</p>
-            <p className="text-sm text-charcoal/60">{venueAddress}</p>
+            <p className="font-serif text-xl text-warm-white mb-2 text-glare">{venueName}</p>
+            <p className="text-sm text-warm-white/60 text-glare-light">{venueAddress}</p>
           </ScrollReveal>
         </div>
 
         {embedUrl && (
           <ScrollReveal variant="scale">
             <div className="max-w-4xl mx-auto space-y-6">
-              <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-lg">
+              <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-lg glass-card">
                 <iframe
                   src={embedUrl}
                   width="100%"

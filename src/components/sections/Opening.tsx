@@ -49,7 +49,7 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen, bac
         >
           <BackgroundMedia url={background} />
 
-          {/* Overlay for readability */}
+          {/* Overlay */}
           <div className="absolute inset-0 bg-black/60" />
 
           {/* Decorative background elements */}
@@ -80,7 +80,7 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen, bac
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="text-sm tracking-[0.3em] text-primary/80 uppercase font-light mb-6"
+              className="text-sm tracking-[0.3em] text-primary/80 uppercase font-light mb-6 text-glare"
             >
               The Wedding Of
             </motion.p>
@@ -88,7 +88,7 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen, bac
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.8 }}
-              className="font-display text-5xl md:text-7xl lg:text-8xl text-warm-white mb-2 leading-tight"
+              className="font-display text-5xl md:text-7xl lg:text-8xl text-warm-white mb-2 leading-tight text-glare"
             >
               {groomName}
             </motion.h1>
@@ -99,14 +99,14 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen, bac
               className="flex items-center justify-center gap-4 my-4"
             >
               <div className="w-12 h-[1px] bg-primary/60" />
-              <span className="font-display text-2xl text-primary">&</span>
+              <span className="font-display text-2xl text-primary text-glare">&</span>
               <div className="w-12 h-[1px] bg-primary/60" />
             </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 1.4 }}
-              className="font-display text-5xl md:text-7xl lg:text-8xl text-warm-white mb-8 leading-tight"
+              className="font-display text-5xl md:text-7xl lg:text-8xl text-warm-white mb-8 leading-tight text-glare"
             >
               {brideName}
             </motion.h1>
@@ -114,7 +114,7 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen, bac
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.8 }}
-              className="text-sm tracking-[0.2em] text-warm-white/60 uppercase mb-12"
+              className="text-sm tracking-[0.2em] text-warm-white/60 uppercase mb-12 text-glare-light"
             >
               {weddingDate}
             </motion.p>

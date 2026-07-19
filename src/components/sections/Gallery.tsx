@@ -22,8 +22,8 @@ export default function Gallery({ images, background }: GalleryProps) {
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>
-            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4">Memories</p>
-            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4">Gallery</h2>
+            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4 text-glare-light">Memories</p>
+            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4 text-glare">Gallery</h2>
             <div className="w-16 h-[1px] bg-primary mx-auto" />
           </ScrollReveal>
         </div>
@@ -34,7 +34,7 @@ export default function Gallery({ images, background }: GalleryProps) {
           ) : (
             images.map((image, index) => (
               <ScrollReveal key={image.id} delay={index * 50}>
-                <div className="relative aspect-square rounded-lg overflow-hidden border border-primary/10 group">
+                <div className="relative aspect-square rounded-lg overflow-hidden border border-primary/10 group glass-card">
                   <img
                     src={image.image_url}
                     alt={image.caption || 'Gallery'}
@@ -42,7 +42,7 @@ export default function Gallery({ images, background }: GalleryProps) {
                   />
                   {image.caption && (
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
-                      <p className="text-xs text-white text-center">{image.caption}</p>
+                      <p className="text-xs text-white text-center text-glare-light">{image.caption}</p>
                     </div>
                   )}
                 </div>
