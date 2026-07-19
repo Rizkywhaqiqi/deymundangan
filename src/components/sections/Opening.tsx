@@ -111,12 +111,20 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen, inv
             >
               {brideName}
             </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.8 }}
+              className="text-sm tracking-[0.2em] text-warm-white/60 uppercase mb-8 text-glare-light"
+            >
+              {weddingDate}
+            </motion.p>
             {invitedGuestName && (
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.6 }}
-                className="text-sm tracking-[0.2em] text-warm-white/70 uppercase font-light mb-6 text-glare-light"
+                transition={{ duration: 0.8, delay: 2.0 }}
+                className="text-sm tracking-[0.2em] text-primary uppercase font-light mb-6 text-glare"
               >
                 Yth. {invitedGuestName}
               </motion.p>
@@ -133,14 +141,6 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen, inv
               <span className="relative z-10">Buka Undangan</span>
               <div className="absolute inset-0 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
             </motion.button>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.8 }}
-              className="text-sm tracking-[0.2em] text-warm-white/60 uppercase mb-8 text-glare-light"
-            >
-              {weddingDate}
-            </motion.p>
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
