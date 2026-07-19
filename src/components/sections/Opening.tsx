@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import BackgroundMedia from '@/components/ui/BackgroundMedia'
 
 interface Particle {
   left: string
@@ -45,15 +46,8 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen, bac
           exit={{ opacity: 0, scale: 1.1 }}
           transition={{ duration: 0.8, ease: 'easeInOut' }}
           className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{
-            backgroundColor: background ? 'transparent' : '#0a0a0a',
-            backgroundImage: background ? `url(${background})` : undefined,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
         >
-          {/* Overlay for readability */}
-          {background && <div className="absolute inset-0 bg-black/60" />}
+          <BackgroundMedia src={background} overlayColor="bg-black/60" />
 
           {/* Decorative background elements */}
           <div className="absolute inset-0 overflow-hidden">

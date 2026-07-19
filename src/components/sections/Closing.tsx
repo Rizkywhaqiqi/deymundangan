@@ -2,6 +2,7 @@
 
 import ScrollReveal from '@/components/ui/ScrollReveal'
 import { motion } from 'framer-motion'
+import BackgroundMedia from '@/components/ui/BackgroundMedia'
 
 interface ClosingProps {
   groomName: string
@@ -11,15 +12,8 @@ interface ClosingProps {
 
 export default function Closing({ groomName, brideName, background }: ClosingProps) {
   return (
-    <section
-      className="relative py-28 md:py-36 lg:py-44 overflow-hidden"
-      style={
-        background
-          ? { backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-          : { backgroundColor: '#0a0a0a' }
-      }
-    >
-      {background && <div className="absolute inset-0 bg-black/60" />}
+    <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden">
+      <BackgroundMedia src={background} overlayColor="bg-black/60" />
 
       {/* Decorative */}
       <div className="absolute inset-0 overflow-hidden">

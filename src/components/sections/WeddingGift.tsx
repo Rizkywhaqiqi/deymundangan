@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import ScrollReveal from '@/components/ui/ScrollReveal'
 import { Copy, Check } from 'lucide-react'
+import BackgroundMedia from '@/components/ui/BackgroundMedia'
 
 interface Gift {
   id: string
@@ -45,15 +46,8 @@ function GiftCard({ gift }: { gift: Gift }) {
 
 export default function WeddingGift({ gifts, background }: WeddingGiftProps) {
   return (
-    <section
-      className="relative py-28 md:py-36 lg:py-44 overflow-hidden"
-      style={
-        background
-          ? { backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-          : { backgroundColor: '#faf8f5' }
-      }
-    >
-      {background && <div className="absolute inset-0 bg-black/50" />}
+    <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden">
+      <BackgroundMedia src={background} overlayColor="bg-black/50" />
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>

@@ -1,7 +1,7 @@
 'use client'
 
 import ScrollReveal from '@/components/ui/ScrollReveal'
-import { motion } from 'framer-motion'
+import BackgroundMedia from '@/components/ui/BackgroundMedia'
 
 interface HeroProps {
   groomName: string
@@ -13,15 +13,8 @@ interface HeroProps {
 
 export default function Hero({ groomName, brideName, weddingDate, venueName, background }: HeroProps) {
   return (
-    <section
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
-      style={
-        background
-          ? { backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-          : { backgroundColor: '#faf8f5' }
-      }
-    >
-      {background && <div className="absolute inset-0 bg-black/50" />}
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <BackgroundMedia src={background} overlayColor="bg-black/50" />
       <div className="section-container relative z-10 text-center py-32">
         <ScrollReveal>
           <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4">The Wedding Of</p>

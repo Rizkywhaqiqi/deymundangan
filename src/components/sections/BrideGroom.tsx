@@ -2,6 +2,7 @@
 
 import ScrollReveal from '@/components/ui/ScrollReveal'
 import { motion } from 'framer-motion'
+import BackgroundMedia from '@/components/ui/BackgroundMedia'
 
 interface BrideGroomProps {
   groomName: string
@@ -21,15 +22,8 @@ interface BrideGroomProps {
 
 export default function BrideGroom({ groomName, groomNickname, groomFather, groomMother, groomChildOrder, groomPhoto, brideName, brideNickname, brideFather, brideMother, brideChildOrder, bridePhoto, background }: BrideGroomProps) {
   return (
-    <section
-      className="relative py-28 md:py-36 lg:py-44 overflow-hidden"
-      style={
-        background
-          ? { backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-          : { backgroundColor: '#ffffff' }
-      }
-    >
-      {background && <div className="absolute inset-0 bg-black/50" />}
+    <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden">
+      <BackgroundMedia src={background} overlayColor="bg-black/50" />
 
       <div className="section-container relative z-10">
         <div className="text-center mb-16">

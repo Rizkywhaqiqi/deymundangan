@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import ScrollReveal from '@/components/ui/ScrollReveal'
+import BackgroundMedia from '@/components/ui/BackgroundMedia'
 
 interface QuoteProps {
   ayat: string
@@ -11,15 +12,8 @@ interface QuoteProps {
 
 export default function Quote({ ayat, surah, background }: QuoteProps) {
   return (
-    <section
-      className="relative py-28 md:py-36 lg:py-44 overflow-hidden"
-      style={
-        background
-          ? { backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-          : { backgroundColor: '#faf8f5' }
-      }
-    >
-      {background && <div className="absolute inset-0 bg-black/60" />}
+    <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden">
+      <BackgroundMedia src={background} overlayColor="bg-black/60" />
 
       {/* Background decorative */}
       <div className="absolute inset-0 opacity-[0.03]">
