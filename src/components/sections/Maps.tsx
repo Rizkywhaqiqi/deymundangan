@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import ScrollReveal from '@/components/ui/ScrollReveal'
+import BackgroundMedia from '@/components/ui/BackgroundMedia'
 
 interface MapsProps {
   venueName: string
@@ -19,48 +20,55 @@ export default function Maps({ venueName, venueAddress, mapUrl, background }: Ma
       return
     }
 
-    // Convert Google Maps URL to embed URL
-    let embed = mapUrl
+    // Helper to check if URL is a valid Google Maps URL for embedding
+    const isGoogleMapsUrl = mapUrl.includes('maps.google.com') || mapUrl.includes('google.com/maps') || mapUrl.includes('goo.gl/maps')
 
-    // If it's a place URL, convert to embed
-    if (mapUrl.includes('maps.google.com') || mapUrl.includes('google.com/maps')) {
-      // Extract place ID or coordinates if possible
-      const placeMatch = mapUrl.match(/place\/([^/]+)/)
-      const queryMatch = mapUrl.match(/[?&]q=([^&]+)/)
-      const llMatch = mapUrl.match(/ll=([^&]+)/)
-
-      if (placeMatch) {
-        const placeName = decodeURIComponent(placeMatch[1])
-        embed = `https://www.google.com/maps/embed/v1/place?q=${encodeURIComponent(placeName)}`
-      } else if (queryMatch) {
-        const query = decodeURIComponent(queryMatch[1])
-        embed = `https://www.google.com/maps/embed/v1/place?q=${encodeURIComponent(query)}`
-      } else if (llMatch) {
-        const coords = llMatch[1]
-        embed = `https://www.google.com/maps/embed/v1/view?center=${coords}&zoom=15`
-      } else {
-        // Fallback: use the URL as is with embed parameter
-        embed = `https://www.google.com/maps/embed?pb=${encodeURIComponent(mapUrl)}`
-      }
-    } else if (mapUrl.includes('goo.gl/maps')) {
-      // Short URL - can't embed directly, show link instead
+    if (!isGoogleMapsUrl) {
+      // Not a Google Maps URL, show link button instead
       setEmbedUrl(null)
       return
     }
 
-    setEmbedUrl(embed)
+    // Handle goo.gl short URLs - can't embed
+    if (mapUrl.includes('goo.gl/maps')) {
+      setEmbedUrl(null)
+      return
+    }
+
+    // Try to extract @lat,lng,zoom pattern
+    const coordPattern = /@(-?\d+\.\d+),(-?\d+\.\d+)/
+    const coordMatch = mapUrl.match(coordPattern)
+
+    if (coordMatch) {
+      const lat = coordMatch[1]
+      const lng = coordMatch[2]
+      setEmbedUrl(`https://www.google.com/maps/embed/v1/view?center=${lat},${lng}&zoom=15`)
+      return
+    }
+
+    // Extract place name
+    const placeMatch = mapUrl.match(/place\/([^/?]+)/)
+    const queryMatch = mapUrl.match(/[?&]q=([^&]+)/)
+
+    if (placeMatch) {
+      const placeName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '))
+      setEmbedUrl(`https://www.google.com/maps/embed/v1/place?q=${encodeURIComponent(placeName)}`)
+      return
+    }
+
+    if (queryMatch) {
+      const query = decodeURIComponent(queryMatch[1].replace(/\+/g, ' '))
+      setEmbedUrl(`https://www.google.com/maps/embed/v1/place?q=${encodeURIComponent(query)}`)
+      return
+    }
+
+    // Fallback: show link button
+    setEmbedUrl(null)
   }, [mapUrl])
 
   return (
-    <section
-      className="relative py-28 md:py-36 lg:py-44 overflow-hidden"
-      style={
-        background
-          ? { backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-          : { backgroundColor: '#ffffff' }
-      }
-    >
-      {background && <div className="absolute inset-0 bg-black/50" />}
+    <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden">
+      <BackgroundMedia url={background} />
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>
