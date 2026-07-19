@@ -86,6 +86,8 @@
 @layer components {
   .section-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    position: relative;
+    z-index: 10;
   }
 
   .section-padding {
@@ -129,10 +131,11 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
+  /* More visible scroll reveal animations */
   .scroll-reveal {
     opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(40px);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .scroll-reveal.visible {
@@ -142,8 +145,8 @@
 
   .scroll-reveal-left {
     opacity: 0;
-    transform: translateX(-30px);
-    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateX(-40px);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .scroll-reveal-left.visible {
@@ -153,8 +156,8 @@
 
   .scroll-reveal-right {
     opacity: 0;
-    transform: translateX(30px);
-    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateX(40px);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .scroll-reveal-right.visible {
@@ -164,13 +167,34 @@
 
   .scroll-reveal-scale {
     opacity: 0;
-    transform: scale(0.9);
-    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: scale(0.85);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .scroll-reveal-scale.visible {
     opacity: 1;
     transform: scale(1);
+  }
+
+  /* Ensure text readability on backgrounds */
+  section {
+    position: relative;
+  }
+
+  section h2 {
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+  }
+
+  section h3 {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  section p {
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  section span {
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   }
 }
 
