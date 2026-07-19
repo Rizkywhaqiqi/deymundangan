@@ -523,6 +523,11 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
                 <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Video URL (YouTube)</label>
                 <input name="video_url" value={(formData.video_url as string) || ''} onChange={handleChange} className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal focus:outline-none focus:border-primary/40" placeholder="https://youtube.com/..." />
               </div>
+              <div>
+                <label className="block text-xs tracking-[0.1em] text-charcoal/50 uppercase mb-2">Cover Image (untuk Preview WhatsApp/Media Sosial)</label>
+                <input name="cover_image" value={(formData.cover_image as string) || ''} onChange={handleChange} placeholder="https://i.ibb.co/... atau URL gambar" className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40" />
+                <p className="text-xs text-charcoal/40 mt-1">Gunakan gambar JPG/PNG. Jika diisi video, akan diabaikan untuk preview.</p>
+              </div>
             </div>
           </section>
 

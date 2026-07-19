@@ -39,20 +39,25 @@ export async function GET(request: NextRequest) {
         <circle cx="600" cy="150" r="3" fill="#d4af37"/>
         
         <!-- Main content -->
-        <text x="600" y="220" font-family="Georgia, serif" font-size="18" fill="#d4af37" text-anchor="middle" letter-spacing="8">THE WEDDING OF</text>
+        <text x="600" y="200" font-family="Georgia, serif" font-size="18" fill="#d4af37" text-anchor="middle" letter-spacing="8">THE WEDDING OF</text>
         
         <!-- Groom Name -->
-        <text x="600" y="300" font-family="Georgia, serif" font-size="52" fill="#ffffff" text-anchor="middle" font-weight="300">${invitation.groom_name}</text>
+        <text x="600" y="270" font-family="Georgia, serif" font-size="48" fill="#ffffff" text-anchor="middle" font-weight="300">${invitation.groom_name}</text>
         
         <!-- Ampersand -->
-        <text x="600" y="370" font-family="Georgia, serif" font-size="36" fill="#d4af37" text-anchor="middle">&</text>
+        <text x="600" y="330" font-family="Georgia, serif" font-size="32" fill="#d4af37" text-anchor="middle">&</text>
         
         <!-- Bride Name -->
-        <text x="600" y="440" font-family="Georgia, serif" font-size="52" fill="#ffffff" text-anchor="middle" font-weight="300">${invitation.bride_name}</text>
+        <text x="600" y="390" font-family="Georgia, serif" font-size="48" fill="#ffffff" text-anchor="middle" font-weight="300">${invitation.bride_name}</text>
         
         <!-- Date -->
-        <text x="600" y="510" font-family="Arial, sans-serif" font-size="16" fill="#ffffff" text-anchor="middle" letter-spacing="4" opacity="0.7">
+        <text x="600" y="450" font-family="Arial, sans-serif" font-size="15" fill="#d4af37" text-anchor="middle" letter-spacing="3" font-weight="500">
           ${new Date(invitation.wedding_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+        </text>
+        
+        <!-- Venue -->
+        <text x="600" y="490" font-family="Arial, sans-serif" font-size="14" fill="#ffffff" text-anchor="middle" letter-spacing="2" opacity="0.8">
+          ${invitation.venue_name}
         </text>
         
         <!-- Bottom decoration -->
