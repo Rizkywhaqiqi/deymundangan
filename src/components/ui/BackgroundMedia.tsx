@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface BackgroundMediaProps {
   url: string | null | undefined
@@ -8,25 +8,50 @@ interface BackgroundMediaProps {
   overlayClassName?: string
 }
 
+function getVideoType(url: string): string {
+  if (url.endsWith('.webm')) return 'video/webm'
+  if (url.endsWith('.mp4')) return 'video/mp4'
+  if (url.endsWith('.ogg') || url.endsWith('.ogv')) return 'video/ogg'
+  if (url.endsWith('.mov')) return 'video/quicktime'
+  if (url.endsWith('.avi')) return 'video/x-msvideo'
+  if (url.endsWith('.mkv')) return 'video/x-matroska'
+  return 'video/mp4' // default fallback
+}
+
 export default function BackgroundMedia({ url, className = '', overlayClassName = '' }: BackgroundMediaProps) {
   const [isVideo, setIsVideo] = useState(false)
   const [videoError, setVideoError] = useState(false)
+  const [videoLoaded, setVideoLoaded] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     if (!url) {
       setIsVideo(false)
+      setVideoError(false)
+      setVideoLoaded(false)
       return
     }
 
     // Check if URL is a video
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv']
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.ogv', '.mov', '.avi', '.mkv']
     const isVideoUrl = videoExtensions.some(ext => url.toLowerCase().includes(ext))
 
     // Also check if it's a direct video URL from common hosting
     const isVideoHosting = url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com')
 
     setIsVideo(isVideoUrl || isVideoHosting)
+    setVideoError(false)
+    setVideoLoaded(false)
   }, [url])
+
+  // Auto-play video when loaded
+  useEffect(() => {
+    if (videoRef.current && isVideo && !videoError) {
+      videoRef.current.play().catch(() => {
+        // Autoplay was prevented, video will be muted by default so should work
+      })
+    }
+  }, [isVideo, videoError])
 
   if (!url) return null
 
@@ -96,19 +121,35 @@ export default function BackgroundMedia({ url, className = '', overlayClassName 
     )
   }
 
-  // Handle direct video files
+  // Handle direct video files (.mp4, .webm, .ogg, etc.)
   if (isVideo && !videoError) {
     return (
       <div className={`absolute inset-0 ${className}`}>
         <video
+          ref={videoRef}
           autoPlay
           loop
           muted
           playsInline
-          className="w-full h-full object-cover"
-          onError={() => setVideoError(true)}
+          className={`w-full h-full object-cover transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
+          onError={() => {
+            console.warn('Video failed to load, falling back to image:', url)
+            setVideoError(true)
+          }}
+          onCanPlay={() => {
+            setVideoLoaded(true)
+          }}
         >
-          <source src={url} type="video/mp4" />
+          <source src={url} type={getVideoType(url)} />
+          {/* Fallback for WebM */}
+          {url.toLowerCase().includes('.webm') && (
+            <source src={url} type="video/webm" />
+          )}
+          {/* Fallback for MP4 */}
+          {url.toLowerCase().includes('.mp4') && (
+            <source src={url} type="video/mp4" />
+          )}
+          Your browser does not support the video tag.
         </video>
         <div className={`absolute inset-0 bg-black/40 ${overlayClassName}`} />
       </div>
