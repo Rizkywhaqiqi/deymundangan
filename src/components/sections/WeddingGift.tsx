@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import ScrollReveal from '@/components/ui/ScrollReveal'
 import BackgroundMedia from '@/components/ui/BackgroundMedia'
+import { Copy, Check } from 'lucide-react'
 
 interface Gift {
   id: string
@@ -16,6 +18,18 @@ interface WeddingGiftProps {
 }
 
 export default function WeddingGift({ gifts, background }: WeddingGiftProps) {
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  const copyToClipboard = async (text: string, giftId: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedId(giftId)
+      setTimeout(() => setCopiedId(null), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+
   return (
     <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden">
       <BackgroundMedia url={background} />
@@ -40,7 +54,22 @@ export default function WeddingGift({ gifts, background }: WeddingGiftProps) {
                     <h3 className="font-serif text-lg text-warm-white mb-3 text-glare">{gift.bank_name}</h3>
                     <div className="space-y-2 text-sm text-warm-white/70">
                       <p>Atas Nama: <span className="font-medium text-warm-white text-glare-light">{gift.account_name}</span></p>
-                      <p>No. Rekening: <span className="font-medium text-warm-white text-glare-light">{gift.account_number}</span></p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="flex-1">
+                          No. Rekening: <span className="font-medium text-warm-white text-glare-light">{gift.account_number}</span>
+                        </p>
+                        <button
+                          onClick={() => copyToClipboard(gift.account_number, gift.id)}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0"
+                          title="Salin nomor rekening"
+                        >
+                          {copiedId === gift.id ? (
+                            <Check size={16} className="text-green-400" />
+                          ) : (
+                            <Copy size={16} className="text-warm-white/60" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </ScrollReveal>
