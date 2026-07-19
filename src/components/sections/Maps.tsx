@@ -69,8 +69,8 @@ export default function Maps({ venueName, venueAddress, mapUrl, background }: Ma
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>
-            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4 text-glare-light">Location</p>
-            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4 text-glare">Lokasi Acara</h2>
+            <p className="text-xs tracking-[0.3em] text-primary/80 uppercase mb-4 text-glare-light">Location</p>
+            <h2 className="font-display text-4xl md:text-5xl text-warm-white mb-4 text-glare">Lokasi Acara</h2>
             <div className="w-16 h-[1px] bg-primary mx-auto" />
           </ScrollReveal>
         </div>

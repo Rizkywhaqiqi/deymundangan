@@ -21,11 +21,11 @@ export default function Closing({ groomName, brideName, background }: ClosingPro
           </ScrollReveal>
 
           <ScrollReveal delay={200}>
-            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-6 text-glare-light">Terima Kasih</p>
-            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-6 text-glare">
+            <p className="text-xs tracking-[0.3em] text-primary/80 uppercase mb-6 text-glare-light">Terima Kasih</p>
+            <h2 className="font-display text-4xl md:text-5xl text-warm-white mb-6 text-glare">
               {groomName} & {brideName}
             </h2>
-            <p className="text-sm text-charcoal/60 leading-relaxed max-w-md mx-auto">
+            <p className="text-sm text-warm-white/70 leading-relaxed max-w-md mx-auto">
               Merupakan suatu kehormatan dan kebahagiaan apabila Bapak/Ibu/Saudara/i berkenan hadir memberikan doa restu kepada kami.
             </p>
           </ScrollReveal>
@@ -33,7 +33,7 @@ export default function Closing({ groomName, brideName, background }: ClosingPro
           <ScrollReveal delay={400}>
             <div className="mt-12 space-y-2">
               <p className="font-display text-3xl text-primary text-glare">Terima Kasih</p>
-              <p className="text-xs tracking-[0.2em] text-charcoal/40 uppercase text-glare-light">
+              <p className="text-xs tracking-[0.2em] text-warm-white/60 uppercase text-glare-light">
                 Wassalamu'alaikum Warahmatullahi Wabarakatuh
               </p>
             </div>
@@ -42,7 +42,7 @@ export default function Closing({ groomName, brideName, background }: ClosingPro
           <ScrollReveal delay={600}>
             <div className="mt-16">
               <div className="w-16 h-[1px] bg-primary mx-auto mb-4" />
-              <p className="text-xs text-charcoal/30 text-glare-light">
+              <p className="text-xs text-warm-white/50 text-glare-light">
                 — Wedding Invitation —
               </p>
             </div>

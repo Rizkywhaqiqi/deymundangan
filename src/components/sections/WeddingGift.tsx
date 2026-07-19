@@ -23,15 +23,15 @@ export default function WeddingGift({ gifts, background }: WeddingGiftProps) {
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>
-            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4 text-glare-light">Wedding Gift</p>
-            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4 text-glare">Hadiah Pernikahan</h2>
+            <p className="text-xs tracking-[0.3em] text-primary/80 uppercase mb-4 text-glare-light">Wedding Gift</p>
+            <h2 className="font-display text-4xl md:text-5xl text-warm-white mb-4 text-glare">Hadiah Pernikahan</h2>
             <div className="w-16 h-[1px] bg-primary mx-auto" />
           </ScrollReveal>
         </div>
 
         <div className="max-w-2xl mx-auto">
           {gifts.length === 0 ? (
-            <p className="text-sm text-charcoal/40 text-center py-8">Belum ada informasi hadiah.</p>
+            <p className="text-sm text-warm-white/40 text-center py-8">Belum ada informasi hadiah.</p>
           ) : (
             <div className="grid gap-4">
               {gifts.map((gift, index) => (

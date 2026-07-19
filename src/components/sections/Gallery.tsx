@@ -22,15 +22,15 @@ export default function Gallery({ images, background }: GalleryProps) {
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>
-            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4 text-glare-light">Memories</p>
-            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4 text-glare">Gallery</h2>
+            <p className="text-xs tracking-[0.3em] text-primary/80 uppercase mb-4 text-glare-light">Memories</p>
+            <h2 className="font-display text-4xl md:text-5xl text-warm-white mb-4 text-glare">Gallery</h2>
             <div className="w-16 h-[1px] bg-primary mx-auto" />
           </ScrollReveal>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
           {images.length === 0 ? (
-            <p className="text-sm text-charcoal/40 text-center py-8 col-span-full">Belum ada foto.</p>
+            <p className="text-sm text-warm-white/40 text-center py-8 col-span-full">Belum ada foto.</p>
           ) : (
             images.map((image, index) => (
               <ScrollReveal key={image.id} delay={index * 50}>
