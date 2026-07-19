@@ -16,10 +16,11 @@ interface OpeningProps {
   brideName: string
   weddingDate: string
   onOpen: () => void
+  invitedGuestName?: string | null
   background?: string | null
 }
 
-export default function Opening({ groomName, brideName, weddingDate, onOpen, background }: OpeningProps) {
+export default function Opening({ groomName, brideName, weddingDate, onOpen, invitedGuestName, background }: OpeningProps) {
   const [isVisible, setIsVisible] = useState(true)
   const [particles, setParticles] = useState<Particle[]>([])
 
@@ -76,6 +77,16 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen, bac
               transition={{ duration: 1.5, delay: 0.3 }}
               className="w-16 h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent mx-auto mb-8"
             />
+            {invitedGuestName && (
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="text-sm tracking-[0.2em] text-warm-white/70 uppercase font-light mb-4 text-glare-light"
+              >
+                Yth. {invitedGuestName}
+              </motion.p>
+            )}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

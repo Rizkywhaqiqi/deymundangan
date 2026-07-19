@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 
 interface PageProps {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export async function generateMetadata({ params }: PageProps) {
@@ -27,8 +28,10 @@ export async function generateMetadata({ params }: PageProps) {
   }
 }
 
-export default async function InvitationSlugPage({ params }: PageProps) {
+export default async function InvitationSlugPage({ params, searchParams }: PageProps) {
   const { slug } = await params
+  const resolvedSearchParams = await searchParams
+  const invitedGuestName = typeof resolvedSearchParams.to === 'string' ? decodeURIComponent(resolvedSearchParams.to) : undefined
 
   try {
     const invitation = await getInvitationBySlug(slug)
@@ -47,6 +50,7 @@ export default async function InvitationSlugPage({ params }: PageProps) {
         stories={storiesResult.data || []}
         galleries={galleriesResult.data || []}
         gifts={giftsResult.data || []}
+        invitedGuestName={invitedGuestName}
       />
     )
   } catch {

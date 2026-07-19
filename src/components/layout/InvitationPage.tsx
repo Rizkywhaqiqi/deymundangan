@@ -89,9 +89,10 @@ interface InvitationPageProps {
   stories: StoryData[]
   galleries: GalleryData[]
   gifts: GiftData[]
+  invitedGuestName?: string | null
 }
 
-export default function InvitationPage({ invitation, stories, galleries, gifts }: InvitationPageProps) {
+export default function InvitationPage({ invitation, stories, galleries, gifts, invitedGuestName }: InvitationPageProps) {
   const [isOpen, setIsOpen] = useState(false)
   const progress = useScrollProgress()
   const { isPlaying, togglePlay } = useAudioPlayer(invitation.music_url)
@@ -120,6 +121,7 @@ export default function InvitationPage({ invitation, stories, galleries, gifts }
           brideName={invitation.bride_name}
           weddingDate={weddingDate}
           onOpen={handleOpen}
+          invitedGuestName={invitedGuestName}
           background={bg.opening}
         />
       )}
