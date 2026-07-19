@@ -3,93 +3,125 @@
 import { useState, useEffect } from 'react'
 
 interface BackgroundMediaProps {
-  src: string | null | undefined
+  url: string | null | undefined
   className?: string
   overlayClassName?: string
-  overlayColor?: string
 }
 
-export default function BackgroundMedia({ src, className = '', overlayClassName = '', overlayColor = 'bg-black/50' }: BackgroundMediaProps) {
-  const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null)
-  const [isLoaded, setIsLoaded] = useState(false)
+export default function BackgroundMedia({ url, className = '', overlayClassName = '' }: BackgroundMediaProps) {
+  const [isVideo, setIsVideo] = useState(false)
+  const [videoError, setVideoError] = useState(false)
 
   useEffect(() => {
-    if (!src) {
-      setMediaType(null)
+    if (!url) {
+      setIsVideo(false)
       return
     }
 
-    // Detect media type from URL
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi']
-    const isVideo = videoExtensions.some(ext => src.toLowerCase().includes(ext)) ||
-                    src.includes('youtube.com') ||
-                    src.includes('youtu.be') ||
-                    src.includes('vimeo.com')
+    // Check if URL is a video
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv']
+    const isVideoUrl = videoExtensions.some(ext => url.toLowerCase().includes(ext))
 
-    setMediaType(isVideo ? 'video' : 'image')
-    setIsLoaded(false)
-  }, [src])
+    // Also check if it's a direct video URL from common hosting
+    const isVideoHosting = url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com')
 
-  if (!src || !mediaType) {
-    return null
+    setIsVideo(isVideoUrl || isVideoHosting)
+  }, [url])
+
+  if (!url) return null
+
+  // Handle YouTube URLs
+  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    const getYouTubeEmbedUrl = (url: string) => {
+      let videoId = ''
+
+      if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1]?.split('?')[0] || ''
+      } else if (url.includes('youtube.com/watch')) {
+        const match = url.match(/[?&]v=([^&]+)/)
+        videoId = match?.[1] || ''
+      } else if (url.includes('youtube.com/embed/')) {
+        videoId = url.split('youtube.com/embed/')[1]?.split('?')[0] || ''
+      }
+
+      if (!videoId) return null
+
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`
+    }
+
+    const embedUrl = getYouTubeEmbedUrl(url)
+
+    if (!embedUrl) return null
+
+    return (
+      <div className={`absolute inset-0 ${className}`}>
+        <iframe
+          src={embedUrl}
+          className="w-full h-full object-cover"
+          style={{ pointerEvents: 'none' }}
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+          title="Video Background"
+        />
+        <div className={`absolute inset-0 bg-black/40 ${overlayClassName}`} />
+      </div>
+    )
   }
 
+  // Handle Vimeo URLs
+  if (url.includes('vimeo.com')) {
+    const getVimeoEmbedUrl = (url: string) => {
+      const match = url.match(/vimeo\.com\/(\d+)/)
+      const videoId = match?.[1] || ''
+      if (!videoId) return null
+      return `https://player.vimeo.com/video/${videoId}?autoplay=1&mute=1&loop=1&background=1&controls=0`
+    }
+
+    const embedUrl = getVimeoEmbedUrl(url)
+
+    if (!embedUrl) return null
+
+    return (
+      <div className={`absolute inset-0 ${className}`}>
+        <iframe
+          src={embedUrl}
+          className="w-full h-full object-cover"
+          style={{ pointerEvents: 'none' }}
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+          title="Video Background"
+        />
+        <div className={`absolute inset-0 bg-black/40 ${overlayClassName}`} />
+      </div>
+    )
+  }
+
+  // Handle direct video files
+  if (isVideo && !videoError) {
+    return (
+      <div className={`absolute inset-0 ${className}`}>
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+          onError={() => setVideoError(true)}
+        >
+          <source src={url} type="video/mp4" />
+        </video>
+        <div className={`absolute inset-0 bg-black/40 ${overlayClassName}`} />
+      </div>
+    )
+  }
+
+  // Fallback to image
   return (
-    <div className={`absolute inset-0 ${className}`}>
-      {mediaType === 'image' && (
-        <>
-          <img
-            src={src}
-            alt="Background"
-            className="w-full h-full object-cover"
-            onLoad={() => setIsLoaded(true)}
-            style={{ opacity: isLoaded ? 1 : 0, transition: 'opacity 0.5s ease-in' }}
-          />
-          {!isLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
-        </>
-      )}
-
-      {mediaType === 'video' && (
-        <>
-          {/* Handle YouTube videos */}
-          {src.includes('youtube.com') || src.includes('youtu.be') ? (
-            <div className="w-full h-full">
-              <iframe
-                src={src.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/') + (src.includes('?') ? '&' : '?') + 'autoplay=1&mute=1&loop=1&playlist=' + src.split('/').pop() + '&controls=0&showinfo=0&rel=0&modestbranding=1'}
-                className="w-full h-full object-cover"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-                title="Background video"
-              />
-            </div>
-          ) : src.includes('vimeo.com') ? (
-            <div className="w-full h-full">
-              <iframe
-                src={src.replace('vimeo.com/', 'player.vimeo.com/video/') + (src.includes('?') ? '&' : '?') + 'autoplay=1&mute=1&loop=1&controls=0'}
-                className="w-full h-full object-cover"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-                title="Background video"
-              />
-            </div>
-          ) : (
-            /* Handle direct video files */
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-              onLoadedData={() => setIsLoaded(true)}
-            >
-              <source src={src} type="video/mp4" />
-            </video>
-          )}
-        </>
-      )}
-
-      {/* Overlay */}
-      <div className={`absolute inset-0 ${overlayColor} ${overlayClassName}`} />
+    <div
+      className={`absolute inset-0 bg-cover bg-center ${className}`}
+      style={{ backgroundImage: `url(${url})` }}
+    >
+      <div className={`absolute inset-0 bg-black/40 ${overlayClassName}`} />
     </div>
   )
 }

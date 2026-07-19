@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import ScrollReveal from '@/components/ui/ScrollReveal'
 import BackgroundMedia from '@/components/ui/BackgroundMedia'
 
@@ -18,28 +19,39 @@ interface LoveStoryProps {
 export default function LoveStory({ stories, background }: LoveStoryProps) {
   return (
     <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden">
-      <BackgroundMedia src={background} overlayColor="bg-black/50" />
+      <BackgroundMedia url={background} />
+
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>
-            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4">Love Story</p>
-            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4">Kisah Kami</h2>
+            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4">Our Journey</p>
+            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4">Love Story</h2>
             <div className="w-16 h-[1px] bg-primary mx-auto" />
           </ScrollReveal>
         </div>
-        <div className="max-w-3xl mx-auto">
-          {stories.map((story, index) => (
-            <ScrollReveal key={story.id} delay={index * 150}>
-              <div className="relative pl-8 pb-12 border-l border-primary/20 last:pb-0">
-                <div className="absolute left-[-5px] top-0 w-[10px] h-[10px] rounded-full bg-primary" />
-                <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-primary/5 ml-4">
-                  <span className="text-xs tracking-[0.2em] text-primary/60 uppercase">{story.year}</span>
-                  <h3 className="font-serif text-lg text-charcoal mt-1 mb-2">{story.title}</h3>
-                  <p className="text-sm text-charcoal/60 leading-relaxed">{story.description}</p>
-                </div>
-              </div>
-            </ScrollReveal>
-          ))}
+
+        <div className="max-w-4xl mx-auto">
+          {stories.length === 0 ? (
+            <p className="text-sm text-charcoal/40 text-center py-8">Belum ada cerita.</p>
+          ) : (
+            <div className="space-y-8">
+              {stories.map((story, index) => (
+                <ScrollReveal key={story.id} delay={index * 100}>
+                  <div className="flex gap-6 items-start">
+                    <div className="flex-shrink-0">
+                      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="font-display text-2xl text-primary">{story.year}</span>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-serif text-xl text-charcoal mb-2">{story.title}</h3>
+                      <p className="text-sm text-charcoal/60 leading-relaxed">{story.description}</p>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

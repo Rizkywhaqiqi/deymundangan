@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import ScrollReveal from '@/components/ui/ScrollReveal'
-import { Send, Heart, MessageCircle } from 'lucide-react'
 import BackgroundMedia from '@/components/ui/BackgroundMedia'
+import { Send, Heart, MessageCircle } from 'lucide-react'
 
 interface WishItem {
   id: string
@@ -74,7 +74,8 @@ export default function Wishes({ invitationId, background }: WishesProps) {
 
   return (
     <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden">
-      <BackgroundMedia src={background} overlayColor="bg-black/50" />
+      <BackgroundMedia url={background} />
+
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>

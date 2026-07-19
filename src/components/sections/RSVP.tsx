@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import ScrollReveal from '@/components/ui/ScrollReveal'
-import { Send, Check } from 'lucide-react'
 import BackgroundMedia from '@/components/ui/BackgroundMedia'
+import { Send } from 'lucide-react'
+import { submitRSVP } from '@/services/invitation'
 
 interface RSVPProps {
   invitationId: string
@@ -11,28 +12,37 @@ interface RSVPProps {
 }
 
 export default function RSVP({ invitationId, background }: RSVPProps) {
-  const [formData, setFormData] = useState({ guest_name: '', phone: '', is_attending: true, total_guests: 1, message: '' })
-  const [isSuccess, setIsSuccess] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    status: 'hadir',
+    total_guests: 1,
+    message: '',
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-
-    const saved = localStorage.getItem(`rsvp_${invitationId}`)
-    const existing = saved ? JSON.parse(saved) : []
-    const updated = [...existing, { ...formData, id: Date.now(), created_at: new Date().toISOString() }]
-    localStorage.setItem(`rsvp_${invitationId}`, JSON.stringify(updated))
-
-    setFormData({ guest_name: '', phone: '', is_attending: true, total_guests: 1, message: '' })
-    setIsSubmitting(false)
-    setIsSuccess(true)
-    setTimeout(() => setIsSuccess(false), 4000)
+    try {
+      await submitRSVP({
+        invitation_id: invitationId,
+        ...formData,
+      })
+      setIsSuccess(true)
+      setFormData({ name: '', phone: '', status: 'hadir', total_guests: 1, message: '' })
+    } catch {
+      alert('Gagal mengirim RSVP')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden">
-      <BackgroundMedia src={background} overlayColor="bg-black/50" />
+      <BackgroundMedia url={background} />
+
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>
@@ -42,33 +52,69 @@ export default function RSVP({ invitationId, background }: RSVPProps) {
           </ScrollReveal>
         </div>
 
-        <div className="max-w-lg mx-auto">
-          <ScrollReveal>
-            <form onSubmit={handleSubmit} className="space-y-4 p-6 md:p-8 rounded-xl bg-warm-white/90 backdrop-blur-sm shadow-sm border border-primary/5">
-              <input type="text" required value={formData.guest_name} onChange={(e) => setFormData({ ...formData, guest_name: e.target.value })} placeholder="Nama Anda" className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm" />
-              <input type="tel" required value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="Nomor WhatsApp" className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm" />
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" checked={formData.is_attending} onChange={() => setFormData({ ...formData, is_attending: true })} className="text-primary" />
-                  <span className="text-sm text-charcoal/70">Hadir</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" checked={!formData.is_attending} onChange={() => setFormData({ ...formData, is_attending: false })} className="text-primary" />
-                  <span className="text-sm text-charcoal/70">Tidak Hadir</span>
-                </label>
+        <div className="max-w-xl mx-auto">
+          {isSuccess ? (
+            <ScrollReveal>
+              <div className="bg-white/90 backdrop-blur-sm p-8 rounded-xl shadow-sm border border-primary/10 text-center">
+                <p className="text-lg font-serif text-charcoal mb-2">Terima Kasih!</p>
+                <p className="text-sm text-charcoal/60">Konfirmasi kehadiran Anda telah diterima.</p>
               </div>
-              <input type="number" min={1} max={10} value={formData.total_guests} onChange={(e) => setFormData({ ...formData, total_guests: parseInt(e.target.value) })} className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm" />
-              <textarea value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} rows={3} placeholder="Pesan (opsional)" className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm resize-none" />
-              <button type="submit" disabled={isSubmitting} className="w-full py-3 bg-primary text-charcoal text-sm tracking-[0.1em] uppercase rounded-full hover:bg-primary-dark transition-colors disabled:opacity-50">
-                {isSubmitting ? 'Mengirim...' : 'Kirim'}
-              </button>
-              {isSuccess && (
-                <p className="text-xs text-primary text-center flex items-center justify-center gap-1">
-                  <Check size={14} /> Konfirmasi terkirim!
-                </p>
-              )}
-            </form>
-          </ScrollReveal>
+            </ScrollReveal>
+          ) : (
+            <ScrollReveal>
+              <div className="bg-white/90 backdrop-blur-sm p-6 md:p-8 rounded-xl shadow-sm border border-primary/10">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Nama Lengkap"
+                    className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40"
+                  />
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="No. WhatsApp (opsional)"
+                    className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40"
+                  />
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal focus:outline-none focus:border-primary/40"
+                  >
+                    <option value="hadir">Hadir</option>
+                    <option value="tidak_hadir">Tidak Hadir</option>
+                    <option value="ragu">Masih Ragu</option>
+                  </select>
+                  <input
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={formData.total_guests}
+                    onChange={(e) => setFormData({ ...formData, total_guests: parseInt(e.target.value) })}
+                    placeholder="Jumlah Tamu"
+                    className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40"
+                  />
+                  <textarea
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    rows={3}
+                    placeholder="Pesan (opsional)"
+                    className="w-full px-4 py-3 bg-cream border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40 resize-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-charcoal text-sm tracking-[0.1em] uppercase rounded-full hover:bg-primary-dark transition-colors disabled:opacity-50"
+                  >
+                    <Send size={16} /> {isSubmitting ? 'Mengirim...' : 'Kirim'}
+                  </button>
+                </form>
+              </div>
+            </ScrollReveal>
+          )}
         </div>
       </div>
     </section>

@@ -1,9 +1,6 @@
 'use client'
 
-import { useState } from 'react'
 import ScrollReveal from '@/components/ui/ScrollReveal'
-import { X } from 'lucide-react'
-import { motion } from 'framer-motion'
 import BackgroundMedia from '@/components/ui/BackgroundMedia'
 
 interface GalleryImage {
@@ -18,45 +15,41 @@ interface GalleryProps {
 }
 
 export default function Gallery({ images, background }: GalleryProps) {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
-
   return (
     <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden">
-      <BackgroundMedia src={background} overlayColor="bg-black/50" />
+      <BackgroundMedia url={background} />
+
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>
-            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4">Gallery</p>
-            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4">Galeri Foto</h2>
+            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4">Memories</p>
+            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4">Gallery</h2>
             <div className="w-16 h-[1px] bg-primary mx-auto" />
           </ScrollReveal>
         </div>
 
-        {images.length === 0 ? (
-          <div className="text-center">
-            <p className="text-sm text-charcoal/40">Belum ada foto</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            {images.map((image, index) => (
-              <ScrollReveal key={image.id} delay={index * 100}>
-                <div className="aspect-[3/4] overflow-hidden rounded-xl cursor-pointer group" onClick={() => setSelectedImage(image.image_url)}>
-                  <img src={image.image_url} alt={image.caption || ''} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
+          {images.length === 0 ? (
+            <p className="text-sm text-charcoal/40 text-center py-8 col-span-full">Belum ada foto.</p>
+          ) : (
+            images.map((image, index) => (
+              <ScrollReveal key={image.id} delay={index * 50}>
+                <div className="relative aspect-square rounded-lg overflow-hidden border border-primary/10 group">
+                  <img
+                    src={image.image_url}
+                    alt={image.caption || 'Gallery'}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  {image.caption && (
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
+                      <p className="text-xs text-white text-center">{image.caption}</p>
+                    </div>
+                  )}
                 </div>
               </ScrollReveal>
-            ))}
-          </div>
-        )}
-
-        {/* Lightbox */}
-        {selectedImage && (
-          <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setSelectedImage(null)}>
-            <button className="absolute top-4 right-4 text-white" onClick={() => setSelectedImage(null)}>
-              <X size={24} />
-            </button>
-            <img src={selectedImage} alt="" className="max-w-full max-h-[90vh] object-contain" />
-          </div>
-        )}
+            ))
+          )}
+        </div>
       </div>
     </section>
   )

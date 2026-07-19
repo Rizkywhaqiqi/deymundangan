@@ -53,10 +53,16 @@ function SectionAccordion({ section, value, onChange }: { section: { key: string
       <AnimatePresence>
         {isOpen && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="px-4 pb-4 space-y-2">
-            <input type="url" value={value} onChange={(e) => onChange(e.target.value)} placeholder="https://i.ibb.co/..." className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40" />
+            <input type="url" value={value} onChange={(e) => onChange(e.target.value)} placeholder="https://i.ibb.co/... atau https://...mp4" className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-primary/40" />
             {value && (
               <div className="relative group">
-                <img src={value} alt={section.label} className="w-full h-24 object-cover rounded-lg border border-primary/5" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                {value.match(/\.(mp4|webm|ogg|mov)$/i) || value.includes('youtube.com') || value.includes('youtu.be') ? (
+                  <video className="w-full h-24 object-cover rounded-lg border border-primary/5" muted autoPlay loop>
+                    <source src={value} type="video/mp4" />
+                  </video>
+                ) : (
+                  <img src={value} alt={section.label} className="w-full h-24 object-cover rounded-lg border border-primary/5" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                )}
                 <button type="button" onClick={() => onChange('')} className="absolute top-1 right-1 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">Hapus</button>
               </div>
             )}
@@ -585,7 +591,7 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
               <Image size={18} className="text-primary" />
               <h2 className="font-serif text-lg text-charcoal">Background per Section</h2>
             </div>
-            <p className="text-xs text-charcoal/40 mb-6">Klik section untuk expand, paste link gambar. Biarkan kosong untuk default.</p>
+            <p className="text-xs text-charcoal/40 mb-6">Klik section untuk expand, paste link <strong>gambar (.jpg/.png)</strong> atau <strong>video (.mp4/.webm/YouTube)</strong>. Biarkan kosong untuk default.</p>
             <div className="space-y-2">
               {SECTIONS.map((section) => (
                 <SectionAccordion key={section.key} section={section} value={((formData.backgrounds as Record<string, string>)?.[section.key]) || ''} onChange={(val) => handleBackgroundChange(section.key, val)} />

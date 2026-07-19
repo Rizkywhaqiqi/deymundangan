@@ -47,7 +47,10 @@ export default function Opening({ groomName, brideName, weddingDate, onOpen, bac
           transition={{ duration: 0.8, ease: 'easeInOut' }}
           className="fixed inset-0 z-50 flex items-center justify-center"
         >
-          <BackgroundMedia src={background} overlayColor="bg-black/60" />
+          <BackgroundMedia url={background} />
+
+          {/* Overlay for readability */}
+          <div className="absolute inset-0 bg-black/60" />
 
           {/* Decorative background elements */}
           <div className="absolute inset-0 overflow-hidden">

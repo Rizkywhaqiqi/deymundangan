@@ -13,7 +13,7 @@ interface QuoteProps {
 export default function Quote({ ayat, surah, background }: QuoteProps) {
   return (
     <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden">
-      <BackgroundMedia src={background} overlayColor="bg-black/60" />
+      <BackgroundMedia url={background} />
 
       {/* Background decorative */}
       <div className="absolute inset-0 opacity-[0.03]">

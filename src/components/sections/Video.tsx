@@ -1,9 +1,6 @@
 'use client'
 
 import ScrollReveal from '@/components/ui/ScrollReveal'
-import { Play } from 'lucide-react'
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import BackgroundMedia from '@/components/ui/BackgroundMedia'
 
 interface VideoProps {
@@ -12,65 +9,63 @@ interface VideoProps {
 }
 
 export default function Video({ videoUrl, background }: VideoProps) {
-  const [isPlaying, setIsPlaying] = useState(false)
+  const getYouTubeEmbedUrl = (url: string) => {
+    let videoId = ''
 
-  if (!videoUrl) return null
+    if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1]?.split('?')[0] || ''
+    } else if (url.includes('youtube.com/watch')) {
+      const match = url.match(/[?&]v=([^&]+)/)
+      videoId = match?.[1] || ''
+    } else if (url.includes('youtube.com/embed/')) {
+      videoId = url.split('youtube.com/embed/')[1]?.split('?')[0] || ''
+    }
 
-  const getYoutubeEmbedUrl = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-    const match = url.match(regExp)
-    const videoId = match && match[2].length === 11 ? match[2] : null
-    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : null
+    if (!videoId) return null
+
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&showinfo=0&rel=0&modestbranding=1&playsinline=1`
   }
-
-  const embedUrl = getYoutubeEmbedUrl(videoUrl)
 
   return (
     <section className="relative py-28 md:py-36 lg:py-44 overflow-hidden">
-      <BackgroundMedia src={background} overlayColor="bg-black/60" />
-      <div className="section-container">
-        {/* Section header */}
+      <BackgroundMedia url={background} />
+
+      <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <ScrollReveal>
-            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4">Video</p>
-            <h2 className="font-display text-4xl md:text-5xl text-warm-white mb-4">Video Prewedding</h2>
+            <p className="text-xs tracking-[0.3em] text-primary/60 uppercase mb-4">Moments</p>
+            <h2 className="font-display text-4xl md:text-5xl text-charcoal mb-4">Video</h2>
             <div className="w-16 h-[1px] bg-primary mx-auto" />
           </ScrollReveal>
         </div>
 
-        <div className="max-w-3xl mx-auto">
+        {videoUrl && (
           <ScrollReveal variant="scale">
-            <div className="relative aspect-video rounded-xl overflow-hidden bg-charcoal/50 group cursor-pointer">
-              {!isPlaying ? (
-                <button
-                  onClick={() => setIsPlaying(true)}
-                  className="absolute inset-0 flex items-center justify-center z-10"
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    className="w-20 h-20 rounded-full bg-primary/90 flex items-center justify-center backdrop-blur-sm"
+            <div className="max-w-4xl mx-auto">
+              <div className="relative w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-lg">
+                {getYouTubeEmbedUrl(videoUrl) ? (
+                  <iframe
+                    src={getYouTubeEmbedUrl(videoUrl)!}
+                    className="w-full h-full"
+                    style={{ border: 0 }}
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                    title="Wedding Video"
+                  />
+                ) : (
+                  <video
+                    controls
+                    className="w-full h-full object-cover"
+                    poster={background || undefined}
                   >
-                    <Play size={32} className="text-charcoal ml-1" />
-                  </motion.div>
-                </button>
-              ) : null}
-
-              {embedUrl && isPlaying ? (
-                <iframe
-                  src={embedUrl}
-                  className="absolute inset-0 w-full h-full"
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-full h-full bg-gradient-to-br from-charcoal/30 to-charcoal/60" />
-                  <span className="font-display text-3xl text-white/10">▶</span>
-                </div>
-              )}
+                    <source src={videoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+              </div>
             </div>
           </ScrollReveal>
-        </div>
+        )}
       </div>
     </section>
   )
