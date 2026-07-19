@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { getInvitationById, updateInvitation, getCurrentUser, getStories, createStory, updateStory, deleteStory } from '@/services/invitation'
+import { getInvitationById, updateInvitation, getCurrentUser, getStories, createStory, updateStory, deleteStory, getGalleries, createGallery, deleteGallery } from '@/services/invitation'
 import { Heart, ArrowLeft, Save, ChevronDown, ChevronUp, Image, Plus, Trash2, Edit } from 'lucide-react'
 import Link from 'next/link'
 
@@ -15,6 +15,13 @@ interface Story {
   title: string
   description: string
   year: string
+  order: number
+}
+
+interface Gallery {
+  id: string
+  image_url: string
+  caption: string | null
   order: number
 }
 
@@ -106,6 +113,20 @@ function StoryItem({ story, onUpdate, onDelete }: { story: Story; onUpdate: (sto
   )
 }
 
+function GalleryItem({ gallery, onDelete }: { gallery: Gallery; onDelete: (id: string) => void }) {
+  return (
+    <div className="relative group">
+      <img src={gallery.image_url} alt={gallery.caption || 'Gallery'} className="w-full h-48 object-cover rounded-lg border border-primary/10" />
+      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+        <button type="button" onClick={() => onDelete(gallery.id)} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors">
+          <Trash2 size={16} />
+        </button>
+      </div>
+      {gallery.caption && <p className="text-xs text-charcoal/60 mt-2 line-clamp-2">{gallery.caption}</p>}
+    </div>
+  )
+}
+
 export default function EditInvitationPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const [id, setId] = useState<string | null>(null)
@@ -115,6 +136,9 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
   const [stories, setStories] = useState<Story[]>([])
   const [newStory, setNewStory] = useState({ title: '', description: '', year: '' })
   const [isAddingStory, setIsAddingStory] = useState(false)
+  const [galleries, setGalleries] = useState<Gallery[]>([])
+  const [newGallery, setNewGallery] = useState({ image_url: '', caption: '' })
+  const [isAddingGallery, setIsAddingGallery] = useState(false)
 
   useEffect(() => {
     const init = async () => {
@@ -127,6 +151,8 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
         setFormData(invitation as FormData)
         const storiesData = await getStories(invitationId)
         setStories((storiesData as Story[]) || [])
+        const galleriesData = await getGalleries(invitationId)
+        setGalleries((galleriesData as Gallery[]) || [])
       } catch { router.push('/admin/dashboard') }
       finally { setIsLoading(false) }
     }
@@ -176,6 +202,32 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
       setStories(stories.filter((s) => s.id !== storyId))
     } catch (error) {
       console.error('Error deleting story:', error)
+    }
+  }
+
+  const handleAddGallery = async () => {
+    if (!id || !newGallery.image_url) return
+    try {
+      const gallery = await createGallery({
+        invitation_id: id,
+        image_url: newGallery.image_url,
+        caption: newGallery.caption,
+        order: galleries.length,
+      })
+      setGalleries([...galleries, gallery as Gallery])
+      setNewGallery({ image_url: '', caption: '' })
+      setIsAddingGallery(false)
+    } catch (error) {
+      console.error('Error creating gallery:', error)
+    }
+  }
+
+  const handleDeleteGallery = async (galleryId: string) => {
+    try {
+      await deleteGallery(galleryId)
+      setGalleries(galleries.filter((g) => g.id !== galleryId))
+    } catch (error) {
+      console.error('Error deleting gallery:', error)
     }
   }
 
@@ -456,6 +508,41 @@ export default function EditInvitationPage({ params }: { params: Promise<{ id: s
               ) : (
                 stories.map((story) => (
                   <StoryItem key={story.id} story={story} onUpdate={handleUpdateStory} onDelete={handleDeleteStory} />
+                ))
+              )}
+            </div>
+          </section>
+
+          {/* Gallery */}
+          <section className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-primary/5">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-serif text-lg text-charcoal">Gallery</h2>
+              <button type="button" onClick={() => setIsAddingGallery(!isAddingGallery)} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-charcoal text-xs rounded-full hover:bg-primary-dark transition-colors">
+                <Plus size={14} /> Tambah
+              </button>
+            </div>
+
+            {/* Add new gallery form */}
+            <AnimatePresence>
+              {isAddingGallery && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mb-4 p-4 bg-cream rounded-lg space-y-3">
+                  <input value={newGallery.image_url} onChange={(e) => setNewGallery({ ...newGallery, image_url: e.target.value })} placeholder="URL Gambar (https://i.ibb.co/...)" className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm" />
+                  <input value={newGallery.caption} onChange={(e) => setNewGallery({ ...newGallery, caption: e.target.value })} placeholder="Caption (opsional)" className="w-full px-3 py-2 bg-white border border-primary/10 rounded-lg text-sm" />
+                  <div className="flex gap-2">
+                    <button type="button" onClick={handleAddGallery} className="px-3 py-1.5 bg-primary text-charcoal text-xs rounded-full">Simpan</button>
+                    <button type="button" onClick={() => setIsAddingGallery(false)} className="px-3 py-1.5 bg-charcoal/10 text-charcoal text-xs rounded-full">Batal</button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Gallery grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {galleries.length === 0 ? (
+                <p className="text-sm text-charcoal/40 text-center py-8 col-span-full">Belum ada foto. Klik "Tambah" untuk menambahkan.</p>
+              ) : (
+                galleries.map((gallery) => (
+                  <GalleryItem key={gallery.id} gallery={gallery} onDelete={handleDeleteGallery} />
                 ))
               )}
             </div>
