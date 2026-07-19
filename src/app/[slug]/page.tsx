@@ -21,10 +21,6 @@ export async function generateMetadata({ params }: PageProps) {
     return {
       title: `Wedding Invitation - ${invitation.groom_name} & ${invitation.bride_name}`,
       description: `Undangan Pernikahan ${invitation.groom_name} & ${invitation.bride_name} - ${new Date(invitation.wedding_date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`,
-      icons: {
-        icon: `${baseUrl}/api/favicon?slug=${slug}`,
-        apple: `${baseUrl}/api/favicon?slug=${slug}`,
-      },
       openGraph: {
         title: `${invitation.groom_name} & ${invitation.bride_name}`,
         description: `Undangan Pernikahan ${invitation.groom_name} & ${invitation.bride_name}`,
