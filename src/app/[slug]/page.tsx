@@ -8,6 +8,10 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
+// ISR: Regenerasi halaman setiap 1 jam (3600 detik)
+// Data undangan jarang berubah, cukup di-refresh periodik
+export const revalidate = 3600
+
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params
   try {
@@ -61,10 +65,23 @@ export default async function InvitationSlugPage({ params, searchParams }: PageP
 
     const supabase = await createServerSupabaseClient()
 
+    // Select hanya kolom yang diperlukan untuk mengurangi bandwidth
     const [storiesResult, galleriesResult, giftsResult] = await Promise.all([
-      supabase.from('stories').select('*').eq('invitation_id', invitation.id).order('order', { ascending: true }),
-      supabase.from('galleries').select('*').eq('invitation_id', invitation.id).order('order', { ascending: true }),
-      supabase.from('gifts').select('*').eq('invitation_id', invitation.id).eq('is_active', true),
+      supabase
+        .from('stories')
+        .select('id, title, description, year, order, image_url')
+        .eq('invitation_id', invitation.id)
+        .order('order', { ascending: true }),
+      supabase
+        .from('galleries')
+        .select('id, image_url, caption, order')
+        .eq('invitation_id', invitation.id)
+        .order('order', { ascending: true }),
+      supabase
+        .from('gifts')
+        .select('id, bank_name, account_name, account_number')
+        .eq('invitation_id', invitation.id)
+        .eq('is_active', true),
     ])
 
     return (

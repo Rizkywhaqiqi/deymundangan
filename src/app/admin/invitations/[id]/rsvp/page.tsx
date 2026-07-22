@@ -8,12 +8,19 @@ import Link from 'next/link'
 
 interface RSVP {
   id: string
-  name: string
+  guest_name: string
   phone: string | null
-  status: 'hadir' | 'tidak_hadir' | 'ragu'
+  is_attending: boolean | null
   total_guests: number
   message: string | null
   created_at: string
+}
+
+// Helper untuk konversi boolean ke status
+function getStatusFromAttending(is_attending: boolean | null): 'hadir' | 'tidak_hadir' | 'ragu' {
+  if (is_attending === true) return 'hadir'
+  if (is_attending === false) return 'tidak_hadir'
+  return 'ragu'
 }
 
 export default function RSVPManagementPage({ params }: { params: Promise<{ id: string }> }) {
@@ -31,7 +38,16 @@ export default function RSVPManagementPage({ params }: { params: Promise<{ id: s
         const user = await getCurrentUser()
         if (!user) { router.push('/admin/login'); return }
         const data = await getRSVPs(invitationId)
-        setRsvps((data as RSVP[]) || [])
+        // Map data dari database ke interface RSVP
+        setRsvps((data || []).map((item: Record<string, unknown>) => ({
+          id: item.id as string,
+          guest_name: item.guest_name as string,
+          phone: item.phone as string | null,
+          is_attending: item.is_attending as boolean | null,
+          total_guests: item.total_guests as number,
+          message: item.message as string | null,
+          created_at: item.created_at as string,
+        })))
       } catch {
         router.push('/admin/dashboard')
       } finally {
@@ -51,23 +67,25 @@ export default function RSVPManagementPage({ params }: { params: Promise<{ id: s
     }
   }
 
-  const filteredRsvps = filter === 'all' ? rsvps : rsvps.filter((r) => r.status === filter)
+  const filteredRsvps = filter === 'all' 
+    ? rsvps 
+    : rsvps.filter((r) => getStatusFromAttending(r.is_attending) === filter)
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (is_attending: boolean | null) => {
+    const status = getStatusFromAttending(is_attending)
     switch (status) {
       case 'hadir': return <CheckCircle size={16} className="text-green-400" />
       case 'tidak_hadir': return <XCircle size={16} className="text-red-400" />
       case 'ragu': return <HelpCircle size={16} className="text-yellow-400" />
-      default: return null
     }
   }
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (is_attending: boolean | null) => {
+    const status = getStatusFromAttending(is_attending)
     switch (status) {
       case 'hadir': return 'Hadir'
       case 'tidak_hadir': return 'Tidak Hadir'
       case 'ragu': return 'Masih Ragu'
-      default: return status
     }
   }
 
@@ -101,21 +119,21 @@ export default function RSVPManagementPage({ params }: { params: Promise<{ id: s
             <p className="text-2xl font-serif text-charcoal">{rsvps.length}</p>
             <p className="text-xs text-charcoal/50">Total RSVP</p>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-primary/5">
-            <CheckCircle size={20} className="text-green-400 mb-2" />
-            <p className="text-2xl font-serif text-charcoal">{rsvps.filter((r) => r.status === 'hadir').length}</p>
-            <p className="text-xs text-charcoal/50">Hadir</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-primary/5">
-            <XCircle size={20} className="text-red-400 mb-2" />
-            <p className="text-2xl font-serif text-charcoal">{rsvps.filter((r) => r.status === 'tidak_hadir').length}</p>
-            <p className="text-xs text-charcoal/50">Tidak Hadir</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-primary/5">
-            <HelpCircle size={20} className="text-yellow-400 mb-2" />
-            <p className="text-2xl font-serif text-charcoal">{rsvps.filter((r) => r.status === 'ragu').length}</p>
-            <p className="text-xs text-charcoal/50">Masih Ragu</p>
-          </div>
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-primary/5">
+                <CheckCircle size={20} className="text-green-400 mb-2" />
+                <p className="text-2xl font-serif text-charcoal">{rsvps.filter((r) => r.is_attending === true).length}</p>
+                <p className="text-xs text-charcoal/50">Hadir</p>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-primary/5">
+                <XCircle size={20} className="text-red-400 mb-2" />
+                <p className="text-2xl font-serif text-charcoal">{rsvps.filter((r) => r.is_attending === false).length}</p>
+                <p className="text-xs text-charcoal/50">Tidak Hadir</p>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-primary/5">
+                <HelpCircle size={20} className="text-yellow-400 mb-2" />
+                <p className="text-2xl font-serif text-charcoal">{rsvps.filter((r) => r.is_attending === null).length}</p>
+                <p className="text-xs text-charcoal/50">Masih Ragu</p>
+              </div>
         </div>
 
         {/* Filter */}
@@ -139,9 +157,9 @@ export default function RSVPManagementPage({ params }: { params: Promise<{ id: s
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-serif text-base text-charcoal">{rsvp.name}</h3>
-                      {getStatusIcon(rsvp.status)}
-                      <span className="text-xs text-charcoal/50">{getStatusLabel(rsvp.status)}</span>
+                      <h3 className="font-serif text-base text-charcoal">{rsvp.guest_name}</h3>
+                      {getStatusIcon(rsvp.is_attending)}
+                      <span className="text-xs text-charcoal/50">{getStatusLabel(rsvp.is_attending)}</span>
                     </div>
                     <div className="space-y-1 text-xs text-charcoal/60">
                       {rsvp.phone && <p>WhatsApp: {rsvp.phone}</p>}

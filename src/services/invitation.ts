@@ -5,11 +5,56 @@ type SupabaseClient = ReturnType<typeof createClient>
 
 // ========== INVITATION ==========
 
+// Kolom yang diperlukan untuk halaman publik
+const PUBLIC_INVITATION_COLUMNS = `
+  id,
+  slug,
+  groom_name,
+  groom_nickname,
+  groom_father,
+  groom_mother,
+  groom_child_order,
+  bride_name,
+  bride_nickname,
+  bride_father,
+  bride_mother,
+  bride_child_order,
+  wedding_date,
+  wedding_day,
+  venue_name,
+  venue_address,
+  venue_city,
+  venue_province,
+  venue_map_url,
+  akad_date,
+  akad_time_start,
+  akad_time_end,
+  akad_venue,
+  resepsi_date,
+  resepsi_time_start,
+  resepsi_time_end,
+  resepsi_venue,
+  quote_ayat,
+  quote_surah,
+  cover_image,
+  music_url,
+  video_url,
+  theme,
+  is_published,
+  is_active,
+  user_id,
+  created_at,
+  updated_at
+`
+
+// Kolom untuk dashboard admin (lebih lengkap)
+const ADMIN_INVITATION_COLUMNS = '*'
+
 export async function getInvitationById(id: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('invitations')
-    .select('*')
+    .select(PUBLIC_INVITATION_COLUMNS)
     .eq('id', id)
     .single()
 
@@ -21,7 +66,7 @@ export async function getAllInvitations() {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('invitations')
-    .select('*')
+    .select('id, slug, groom_name, bride_name, wedding_date, is_published, is_active, created_at, updated_at')
     .order('created_at', { ascending: false })
 
   if (error) throw error
@@ -70,7 +115,7 @@ export async function getStories(invitationId: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('stories')
-    .select('*')
+    .select('id, title, description, year, order, image_url')
     .eq('invitation_id', invitationId)
     .order('order', { ascending: true })
 
@@ -120,7 +165,7 @@ export async function getGalleries(invitationId: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('galleries')
-    .select('*')
+    .select('id, image_url, caption, order')
     .eq('invitation_id', invitationId)
     .order('order', { ascending: true })
 
@@ -157,7 +202,7 @@ export async function getGifts(invitationId: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('gifts')
-    .select('*')
+    .select('id, bank_name, account_name, account_number')
     .eq('invitation_id', invitationId)
     .eq('is_active', true)
 
@@ -206,7 +251,7 @@ export async function getRSVPs(invitationId: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('rsvp')
-    .select('*')
+    .select('id, guest_name, phone, is_attending, total_guests, message, created_at')
     .eq('invitation_id', invitationId)
     .order('created_at', { ascending: false })
 
@@ -231,7 +276,7 @@ export async function getWishes(invitationId: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('wishes')
-    .select('*')
+    .select('id, name, message, created_at')
     .eq('invitation_id', invitationId)
     .eq('is_approved', true)
     .order('created_at', { ascending: false })
@@ -317,7 +362,7 @@ export async function getProfile(userId: string) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('profiles')
-    .select('*')
+    .select('id, email, full_name, avatar_url, role')
     .eq('id', userId)
     .single()
 

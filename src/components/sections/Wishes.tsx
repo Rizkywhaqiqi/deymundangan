@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import ScrollReveal from '@/components/ui/ScrollReveal'
 import BackgroundMedia from '@/components/ui/BackgroundMedia'
-import { Send, Heart, MessageCircle } from 'lucide-react'
+import { Send, Heart, MessageCircle, ChevronDown } from 'lucide-react'
 
 interface WishItem {
   id: string
@@ -17,30 +17,52 @@ interface WishesProps {
   background?: string | null
 }
 
+const WISHES_PER_PAGE = 20
+
 export default function Wishes({ invitationId, background }: WishesProps) {
   const [wishes, setWishes] = useState<WishItem[]>([])
   const [formData, setFormData] = useState({ name: '', message: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(false)
+  const [total, setTotal] = useState(0)
+
+  const fetchWishes = useCallback(async (pageNum: number, append: boolean = false) => {
+    try {
+      const response = await fetch(
+        `/api/wishes?invitation_id=${invitationId}&page=${pageNum}&limit=${WISHES_PER_PAGE}`
+      )
+      if (response.ok) {
+        const result = await response.json()
+        if (append) {
+          setWishes(prev => [...prev, ...(result.data || [])])
+        } else {
+          setWishes(result.data || [])
+        }
+        setTotal(result.total || 0)
+        setHasMore(result.hasMore || false)
+      }
+    } catch (error) {
+      console.error('Error fetching wishes:', error)
+    } finally {
+      setIsLoading(false)
+      setIsLoadingMore(false)
+    }
+  }, [invitationId])
 
   useEffect(() => {
-    const fetchWishes = async () => {
-      try {
-        const response = await fetch(`/api/wishes?invitation_id=${invitationId}`)
-        if (response.ok) {
-          const data = await response.json()
-          setWishes(data || [])
-        }
-      } catch (error) {
-        console.error('Error fetching wishes:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+    fetchWishes(1)
+  }, [fetchWishes])
 
-    fetchWishes()
-  }, [invitationId])
+  const handleLoadMore = () => {
+    const nextPage = page + 1
+    setIsLoadingMore(true)
+    setPage(nextPage)
+    fetchWishes(nextPage, true)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,6 +82,7 @@ export default function Wishes({ invitationId, background }: WishesProps) {
       if (response.ok) {
         const newWish = await response.json()
         setWishes([newWish, ...wishes])
+        setTotal(prev => prev + 1)
         setFormData({ name: '', message: '' })
         setIsSuccess(true)
         setTimeout(() => setIsSuccess(false), 3000)
@@ -140,6 +163,17 @@ export default function Wishes({ invitationId, background }: WishesProps) {
                       <p className="text-sm text-warm-white/60 leading-relaxed">{wish.message}</p>
                     </div>
                   ))}
+                  {/* Tombol Load More */}
+                  {hasMore && (
+                    <button
+                      onClick={handleLoadMore}
+                      disabled={isLoadingMore}
+                      className="w-full flex items-center justify-center gap-2 py-3 text-xs text-primary/70 hover:text-primary transition-colors"
+                    >
+                      <ChevronDown size={16} className={isLoadingMore ? 'animate-spin' : ''} />
+                      {isLoadingMore ? 'Memuat...' : `Tampilkan lebih banyak (${total - wishes.length} lagi)`}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
