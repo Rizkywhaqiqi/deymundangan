@@ -30,13 +30,32 @@ WHERE is_active = true;
 DROP INDEX IF EXISTS idx_wishes_invitation_id;
 
 -- 3. OPTIMASI RLS POLICIES - ganti subquery dengan security definer functions
+-- CATATAN: Fungsi menggunakan SECURITY INVOKER agar publik tidak bisa memanggil via RPC API
+-- dan search_path di-set ke 'public' untuk mencegah serangan search_path
 
--- Buat function helper untuk cek akses publik (lebih cepat daripada subquery)
+-- Perbaiki fungsi update_updated_at_column yang sudah ada (tambah search_path)
+-- Fungsi lama akan di-drop dulu karena menggunakan SECURITY DEFINER tanpa search_path
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = 'public'
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+-- Buat function helper untuk cek akses publik
+-- AMAN: Fungsi ini hanya SELECT dari tabel invitations yang sudah punya RLS policy publik
+-- dan menggunakan SECURITY INVOKER sehingga berjalan dengan hak akses pemanggil (bukan superuser)
 CREATE OR REPLACE FUNCTION is_invitation_published(inv_id UUID)
 RETURNS BOOLEAN
 LANGUAGE sql
 STABLE
-SECURITY DEFINER
+SECURITY INVOKER
+SET search_path = 'public'
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM invitations
@@ -44,12 +63,15 @@ AS $$
   );
 $$;
 
--- Buat function helper untuk cek kepemilikan (lebih cepat daripada subquery)
+-- Buat function helper untuk cek kepemilikan
+-- AMAN: Fungsi ini hanya SELECT dengan filter auth.uid() yang aman
+-- dan menggunakan SECURITY INVOKER sehingga berjalan dengan hak akses pemanggil
 CREATE OR REPLACE FUNCTION is_invitation_owner(inv_id UUID)
 RETURNS BOOLEAN
 LANGUAGE sql
 STABLE
-SECURITY DEFINER
+SECURITY INVOKER
+SET search_path = 'public'
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM invitations
@@ -107,6 +129,19 @@ CREATE POLICY "Approved wishes viewable by everyone" ON wishes
     is_approved = true OR is_invitation_owner(invitation_id)
   );
 
--- 5. REKOMENDASI: Aktifkan pg_stat_statements untuk monitoring query performance
--- (Hanya bisa diaktifkan via Supabase Dashboard -> Database -> Extensions)
+-- 5. CATATAN TAMBAHAN UNTUK LINTER WARNS:
+-- 
+-- a) RLS Policy "Anyone can insert RSVP" dengan WITH CHECK (true) -> INI DISENGAJA
+--    Tamu publik harus bisa submit RSVP tanpa login. Ini adalah requirement fungsional.
+--    Tidak ada data sensitif yang bisa dieksploitasi karena hanya INSERT.
+--
+-- b) RLS Policy "Anyone can insert wishes" dengan WITH CHECK (true) -> INI DISENGAJA
+--    Tamu publik harus bisa kirim ucapan tanpa login. Sama seperti RSVP.
+--
+-- c) Leaked Password Protection -> Aktifkan via Supabase Dashboard:
+--    Authentication -> Settings -> Bot Protection -> Enable "Leaked password protection"
+
+-- 6. AKTIFKAN PG_STAT_STATEMENTS (opsional, untuk monitoring query)
+-- Buka: Supabase Dashboard -> Database -> Extensions -> cari "pg_stat_statements" -> Enable
+-- Atau jalankan:
 -- CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
